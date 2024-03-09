@@ -7,5 +7,6 @@ import { PrismaModule } from 'src/services/prisma/prisma.module';
   imports: [PrismaModule],
   controllers: [DataManagementController],
   providers: [DataManagementService],
+  exports: [DataManagementService],
 })
 export class DataManagementModule {}

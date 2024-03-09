@@ -37,7 +37,12 @@ export class DataManagementService {
     console.log(botToken);
   }
 
-  getBotToken() {
-    return this.prisma.botToken.findMany();
+  async getBotToken() {
+    const activeBotToken = await this.prisma.botToken.findFirst({
+      where: {
+        isActivated: true,
+      },
+    });
+    return activeBotToken;
   }
 }
