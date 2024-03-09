@@ -36,4 +36,8 @@ export class DataManagementService {
     });
     console.log(botToken);
   }
+
+  getBotToken() {
+    return this.prisma.botToken.findMany();
+  }
 }

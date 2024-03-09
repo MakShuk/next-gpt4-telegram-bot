@@ -33,4 +33,9 @@ export class DataManagementController {
   setBotToken() {
     return this.dataManagementService.setBotToken();
   }
+
+  @Get('bot-token')
+  getBotToken() {
+    return this.dataManagementService.getBotToken();
+  }
 }

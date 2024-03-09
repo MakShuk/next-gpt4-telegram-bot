@@ -28,8 +28,8 @@ model Role {
 }
 
 model BotToken {
-  id      Int     @id @default(autoincrement())
-  token   String
-  botName String
-  status  Boolean @default(false)
+  id          Int     @id @default(autoincrement())
+  token       String  @unique
+  botName     String  @unique
+  isActivated Boolean @default(false)
 }
