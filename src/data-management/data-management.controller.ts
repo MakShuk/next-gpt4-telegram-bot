@@ -1,4 +1,11 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { DataManagementService } from './data-management.service';
 
 @Controller('data-management')
@@ -10,8 +17,9 @@ export class DataManagementController {
     return this.dataManagementService.getUsers();
   }
 
-  @Post('create-user')
-  createNewUser() {
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  @Post('create-role')
+  createNewRole(@Body() query: CreateTagDto) {
     return this.dataManagementService.createNewRole();
   }
 

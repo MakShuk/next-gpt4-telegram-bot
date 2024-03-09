@@ -13,11 +13,11 @@ export class DataManagementService {
     return null;
   }
 
-  async createNewRole() {
+  async createNewRole(name: string, maxUsers: number) {
     const newRole = await this.prisma.role.create({
       data: {
-        name: 'User',
-        maxUsers: 999_999_999,
+        name,
+        maxUsers,
       },
     });
     console.log(newRole);
