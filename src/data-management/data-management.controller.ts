@@ -28,4 +28,9 @@ export class DataManagementController {
   getAllRoles() {
     return this.dataManagementService.getAllRoles();
   }
+
+  @Post('set-bot-token')
+  setBotToken() {
+    return this.dataManagementService.setBotToken();
+  }
 }

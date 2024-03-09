@@ -26,4 +26,14 @@ export class DataManagementService {
   getAllRoles() {
     return this.prisma.role.findMany();
   }
+
+  async setBotToken() {
+    const botToken = await this.prisma.botToken.create({
+      data: {
+        token: '1888646294:AAGLcttVtKEEdVXFTFDuGtRy5FGQbdOKFfQ',
+        botName: 'maksLifeBot',
+      },
+    });
+    console.log(botToken);
+  }
 }
