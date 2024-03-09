@@ -21,16 +21,15 @@ model User {
 }
 
 model Role {
-  id    Int    @id @default(autoincrement())
-  name  String
-  users User[]
-  maxUsers Int @default(1)
+  id       Int    @id @default(autoincrement())
+  name     String
+  users    User[]
+  maxUsers Int    @default(1)
 }
 
 model BotToken {
-  id     Int    @id @default(autoincrement())
-  token  String
-  status Boolean @default(false)
+  id      Int     @id @default(autoincrement())
+  token   String
+  botName String
+  status  Boolean @default(false)
 }
-
-

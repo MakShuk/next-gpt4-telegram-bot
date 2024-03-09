@@ -7,6 +7,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { DataManagementService } from './data-management.service';
+import { CreateRoleDto } from './dto/create-data-management.dto';
 
 @Controller('data-management')
 export class DataManagementController {
@@ -19,8 +20,8 @@ export class DataManagementController {
 
   @UsePipes(new ValidationPipe({ whitelist: true }))
   @Post('create-role')
-  createNewRole(@Body() query: CreateTagDto) {
-    return this.dataManagementService.createNewRole();
+  createNewRole(@Body() query: CreateRoleDto) {
+    return this.dataManagementService.createNewRole(query.name, query.maxUsers);
   }
 
   @Get('roles')
