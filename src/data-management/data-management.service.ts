@@ -6,8 +6,12 @@ import { CreateBotTokenDto } from './dto/create-data-management.dto';
 export class DataManagementService {
   constructor(private prisma: PrismaService) {}
   async getUsers() {
-    const allUsers = await this.prisma.user.findMany();
-    return allUsers;
+    try {
+      const allUsers = await this.prisma.user.findMany();
+      return { error: false, data: allUsers, message: 'Users found' };
+    } catch (error) {
+      return { error: true, message: `getUsers error: ${error}` };
+    }
   }
 
   createNewUser() {
@@ -15,17 +19,32 @@ export class DataManagementService {
   }
 
   async createNewRole(name: string, maxUsers: number) {
-    const newRole = await this.prisma.role.create({
-      data: {
-        name,
-        maxUsers,
-      },
-    });
-    console.log(newRole);
+    try {
+      const newRole = await this.prisma.role.create({
+        data: {
+          name,
+          maxUsers,
+        },
+      });
+      console.log(newRole);
+      return {
+        error: false,
+        data: newRole,
+        message: 'Role created successfully',
+      };
+    } catch (error) {
+      console.log(error);
+      return { error: true, message: `createNewRole error: ${error}` };
+    }
   }
 
-  getAllRoles() {
-    return this.prisma.role.findMany();
+  async getAllRoles() {
+    try {
+      const roles = await this.prisma.role.findMany();
+      return { error: false, data: roles, message: 'Roles found' };
+    } catch (error) {
+      return { error: true, message: `getAllRoles error: ${error}` };
+    }
   }
 
   async setBotToken(data: CreateBotTokenDto) {

@@ -13,7 +13,13 @@ export class TelegrafService {
   private botRun: false | Date = false;
   async startBot() {
     const botToken = await this.dataManagementService.getBotToken(); // Получаем токен бота
-    this.bot = new Telegraf(botToken.token);
+
+    if (botToken.error && !botToken.data) {
+      this.logger.error('Ошибка получения токена бота');
+      return `Ошибка получения токена бота: ${botToken.message}`;
+    }
+
+    this.bot = new Telegraf(botToken.data.token); // Создаем экземпляр бота
 
     if (this.botRun) {
       this.logger.warn('Бот уже запущен');

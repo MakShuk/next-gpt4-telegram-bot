@@ -19,19 +19,24 @@ export class DataManagementController {
   constructor(private readonly dataManagementService: DataManagementService) {}
 
   @Get('users')
-  findAllUsers() {
-    return this.dataManagementService.getUsers();
+  async findAllUsers() {
+    return this.checkError(await this.dataManagementService.getUsers());
   }
 
   @UsePipes(new ValidationPipe({ whitelist: true }))
   @Post('create-role')
-  createNewRole(@Body() query: CreateRoleDto) {
-    return this.dataManagementService.createNewRole(query.name, query.maxUsers);
+  async createNewRole(@Body() query: CreateRoleDto) {
+    return this.checkError(
+      await this.dataManagementService.createNewRole(
+        query.name,
+        query.maxUsers,
+      ),
+    );
   }
 
   @Get('roles')
-  getAllRoles() {
-    return this.dataManagementService.getAllRoles();
+  async getAllRoles() {
+    return this.checkError(await this.dataManagementService.getAllRoles());
   }
 
   @UsePipes(new ValidationPipe({ whitelist: true }))
@@ -45,7 +50,7 @@ export class DataManagementController {
     return this.checkError(await this.dataManagementService.getBotToken());
   }
 
-  private checkError(resultStatus: any) {
+  private checkError(resultStatus: { error: boolean; message: string }) {
     if (resultStatus.error) {
       throw new HttpException(
         `${resultStatus.message}`,
