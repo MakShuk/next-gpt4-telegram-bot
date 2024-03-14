@@ -18,7 +18,6 @@ export class DataManagementService {
           maxUsers,
         },
       });
-      console.log(newRole);
       return {
         error: false,
         data: newRole,

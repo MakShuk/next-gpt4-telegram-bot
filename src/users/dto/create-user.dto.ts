@@ -16,12 +16,18 @@ export class CreateRoleDto {
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
-  @Length(3, 35)
+  @Length(3, 40)
   readonly name: string;
 
   @IsInt()
   @IsNotEmpty()
-  @Min(3)
-  @Max(26)
-  readonly id: number;
+  @Min(999)
+  @Max(999_999_999)
+  readonly telegramId: number;
+
+  @IsInt()
+  @IsNotEmpty()
+  @Min(1)
+  @Max(10)
+  readonly roleId: number;
 }

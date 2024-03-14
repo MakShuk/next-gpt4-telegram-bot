@@ -7,7 +7,12 @@ import { DataManagementModule } from './data-management/data-management.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
-  imports: [TelegrafModule, ConfigModule.forRoot(), DataManagementModule, UsersModule],
+  imports: [
+    TelegrafModule,
+    ConfigModule.forRoot(),
+    DataManagementModule,
+    UsersModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

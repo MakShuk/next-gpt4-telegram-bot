@@ -5,9 +5,38 @@ import { PrismaService } from 'src/services/prisma/prisma.service';
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
-  create(createUserDto: CreateUserDto) {
-    console.log(createUserDto);
-    return 'This action adds a new user';
+
+  async create(createUserDto: CreateUserDto) {
+    try {
+      const { name, telegramId, roleId } = createUserDto;
+      const role = await this.prisma.role.findUnique({
+        where: { id: roleId },
+        include: { users: true },
+      });
+
+      if (!role) {
+        throw new Error('Роль не найдена');
+      }
+
+      if (role.users.length >= role.maxUsers) {
+        throw new Error(
+          'Превышено максимальное количество пользователей для этой роли',
+        );
+      }
+
+      const newUser = await this.prisma.user.create({
+        data: {
+          name: name,
+          telegramId: telegramId,
+          role: {
+            connect: { id: roleId },
+          },
+        },
+      });
+      return { error: false, data: newUser, message: 'User created' };
+    } catch (error) {
+      return { error: true, message: `createUser error: ${error.message}` };
+    }
   }
 
   async findAll() {
@@ -19,13 +48,36 @@ export class UsersService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          telegramId: id,
+        },
+      });
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      return { error: false, data: user, message: 'User found' };
+    } catch (error) {
+      return { error: true, message: `getUser error: ${error}` };
+    }
   }
 
-  update(id: number, updateUserDto: CreateUserDto) {
-    console.log(updateUserDto);
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: CreateUserDto) {
+    try {
+      const { name } = updateUserDto;
+      const updatedUser = await this.prisma.user.update({
+        where: { telegramId: id },
+        data: {
+          name: name,
+        },
+      });
+      return { error: false, data: updatedUser, message: 'User updated' };
+    } catch (error) {
+      return { error: true, message: `updateUser error: ${error}` };
+    }
   }
 
   remove(id: number) {

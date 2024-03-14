@@ -14,9 +14,10 @@ generator client {
 }
 
 model User {
-  id         Int  @id @default(autoincrement())
-  telegramId Int
-  role       Role @relation(fields: [roleId], references: [id])
+  id         Int    @id @default(autoincrement())
+  name       String
+  telegramId Int    @unique
+  role       Role   @relation(fields: [roleId], references: [id])
   roleId     Int
 }
 
@@ -33,3 +34,4 @@ model BotToken {
   botName     String  @unique
   isActivated Boolean @default(false)
 }
+
