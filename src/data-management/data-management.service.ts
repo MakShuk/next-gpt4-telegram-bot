@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma/prisma.service';
+import { CreateBotTokenDto } from './dto/create-data-management.dto';
 
 @Injectable()
 export class DataManagementService {
@@ -27,12 +28,9 @@ export class DataManagementService {
     return this.prisma.role.findMany();
   }
 
-  async setBotToken() {
+  async setBotToken(data: CreateBotTokenDto) {
     const botToken = await this.prisma.botToken.create({
-      data: {
-        token: '1888646294:AAGLcttVtKEEdVXFTFDuGtRy5FGQbdOKFfQ',
-        botName: 'maksLifeBot',
-      },
+      data,
     });
     console.log(botToken);
   }

@@ -12,3 +12,15 @@ export class CreateRoleDto {
   @Max(999_999_999)
   readonly maxUsers: number;
 }
+
+export class CreateBotTokenDto {
+  @IsString()
+  @IsNotEmpty()
+  @Length(46, 46)
+  readonly token: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(3, 35)
+  readonly botName: string;
+}

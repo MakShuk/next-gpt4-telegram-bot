@@ -7,7 +7,10 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { DataManagementService } from './data-management.service';
-import { CreateRoleDto } from './dto/create-data-management.dto';
+import {
+  CreateBotTokenDto,
+  CreateRoleDto,
+} from './dto/create-data-management.dto';
 
 @Controller('data-management')
 export class DataManagementController {
@@ -29,9 +32,10 @@ export class DataManagementController {
     return this.dataManagementService.getAllRoles();
   }
 
+  @UsePipes(new ValidationPipe({ whitelist: true }))
   @Post('set-bot-token')
-  setBotToken() {
-    return this.dataManagementService.setBotToken();
+  setBotToken(@Body() query: CreateBotTokenDto) {
+    return this.dataManagementService.setBotToken(query);
   }
 
   @Get('bot-token')
