@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
+  HttpStatus,
   Post,
   UsePipes,
   ValidationPipe,
@@ -34,12 +36,22 @@ export class DataManagementController {
 
   @UsePipes(new ValidationPipe({ whitelist: true }))
   @Post('set-bot-token')
-  setBotToken(@Body() query: CreateBotTokenDto) {
-    return this.dataManagementService.setBotToken(query);
+  async setBotToken(@Body() query: CreateBotTokenDto) {
+    return this.checkError(await this.dataManagementService.setBotToken(query));
   }
 
   @Get('bot-token')
-  getBotToken() {
-    return this.dataManagementService.getBotToken();
+  async getBotToken() {
+    return this.checkError(await this.dataManagementService.getBotToken());
+  }
+
+  private checkError(resultStatus: any) {
+    if (resultStatus.error) {
+      throw new HttpException(
+        `${resultStatus.message}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return resultStatus;
   }
 }

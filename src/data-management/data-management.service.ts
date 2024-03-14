@@ -29,18 +29,29 @@ export class DataManagementService {
   }
 
   async setBotToken(data: CreateBotTokenDto) {
-    const botToken = await this.prisma.botToken.create({
-      data,
-    });
-    console.log(botToken);
+    try {
+      const botToken = await this.prisma.botToken.create({
+        data,
+      });
+      return {
+        error: false,
+        message: `Bot token set successfully, ${botToken.botName} - ${botToken.token}`,
+      };
+    } catch (error) {
+      return { error: true, message: `setBotToken error: ${error}` };
+    }
   }
 
   async getBotToken() {
-    const activeBotToken = await this.prisma.botToken.findFirst({
-      where: {
-        isActivated: true,
-      },
-    });
-    return activeBotToken;
+    try {
+      const activeBotToken = await this.prisma.botToken.findFirst({
+        where: {
+          isActivated: true,
+        },
+      });
+      return { error: false, data: activeBotToken, message: 'Bot token found' };
+    } catch (error) {
+      return { error: true, message: `getBotToken error: ${error}` };
+    }
   }
 }
