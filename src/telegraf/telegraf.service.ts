@@ -11,6 +11,7 @@ export class TelegrafService {
   ) {}
   private bot: Telegraf;
   private botRun: false | Date = false;
+
   async startBot() {
     const botToken = await this.dataManagementService.getBotToken(); // Получаем токен бота
 
@@ -25,6 +26,12 @@ export class TelegrafService {
       this.logger.warn('Бот уже запущен');
       return `Бот уже запущен: ${this.botRun}`;
     }
+
+    this.bot.command('t', (ctx) => {
+      console.log(ctx.message.from);
+      ctx.reply('Hello');
+    });
+
     this.bot.launch();
     this.logger.info('Бот запущен');
     this.botRun = new Date();

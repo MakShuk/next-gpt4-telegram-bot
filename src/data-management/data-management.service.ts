@@ -5,14 +5,6 @@ import { CreateBotTokenDto } from './dto/create-data-management.dto';
 @Injectable()
 export class DataManagementService {
   constructor(private prisma: PrismaService) {}
-  async getUsers() {
-    try {
-      const allUsers = await this.prisma.user.findMany();
-      return { error: false, data: allUsers, message: 'Users found' };
-    } catch (error) {
-      return { error: true, message: `getUsers error: ${error}` };
-    }
-  }
 
   createNewUser() {
     return null;

@@ -18,11 +18,6 @@ import {
 export class DataManagementController {
   constructor(private readonly dataManagementService: DataManagementService) {}
 
-  @Get('users')
-  async findAllUsers() {
-    return this.checkError(await this.dataManagementService.getUsers());
-  }
-
   @UsePipes(new ValidationPipe({ whitelist: true }))
   @Post('create-role')
   async createNewRole(@Body() query: CreateRoleDto) {
