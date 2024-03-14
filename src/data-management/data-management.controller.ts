@@ -1,48 +1,45 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
+  Patch,
   Post,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { DataManagementService } from './data-management.service';
-import {
-  CreateBotTokenDto,
-  CreateRoleDto,
-} from './dto/create-data-management.dto';
+import { CreateBotTokenDto } from './dto/create-data-management.dto';
 
 @Controller('data-management')
 export class DataManagementController {
   constructor(private readonly dataManagementService: DataManagementService) {}
 
   @UsePipes(new ValidationPipe({ whitelist: true }))
-  @Post('create-role')
-  async createNewRole(@Body() query: CreateRoleDto) {
-    return this.checkError(
-      await this.dataManagementService.createNewRole(
-        query.name,
-        query.maxUsers,
-      ),
-    );
-  }
-
-  @Get('roles')
-  async getAllRoles() {
-    return this.checkError(await this.dataManagementService.getAllRoles());
-  }
-
-  @UsePipes(new ValidationPipe({ whitelist: true }))
-  @Post('set-bot-token')
-  async setBotToken(@Body() query: CreateBotTokenDto) {
-    return this.checkError(await this.dataManagementService.setBotToken(query));
+  @Post('new-bot-token')
+  async newBotToken(@Body() query: CreateBotTokenDto) {
+    return this.checkError(await this.dataManagementService.newBotToken(query));
   }
 
   @Get('bot-token')
   async getBotToken() {
     return this.checkError(await this.dataManagementService.getBotToken());
+  }
+
+  @Patch('activate-bot-token')
+  async activateBotToken(@Body() query: { botName: string }) {
+    return this.checkError(
+      await this.dataManagementService.activateBotToken(query.botName),
+    );
+  }
+
+  @Delete('delete-bot-token')
+  async deleteBotToken(@Body() query: { botName: string }) {
+    return this.checkError(
+      await this.dataManagementService.deleteBotToken(query.botName),
+    );
   }
 
   private checkError(resultStatus: { error: boolean; message: string }) {

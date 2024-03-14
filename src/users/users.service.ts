@@ -80,7 +80,51 @@ export class UsersService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { telegramId: id },
+      });
+      if (!user) {
+        throw new Error('User not found');
+      }
+      if (user.roleId === 1) {
+        return { error: true, message: 'Cannot delete user with role id 1' };
+      }
+      await this.prisma.user.delete({
+        where: { telegramId: id },
+      });
+      return { error: false, message: 'User deleted' };
+    } catch (error) {
+      return { error: true, message: `deleteUser error: ${error.message}` };
+    }
+  }
+
+  async createNewRole(name: string, maxUsers: number) {
+    try {
+      const newRole = await this.prisma.role.create({
+        data: {
+          name,
+          maxUsers,
+        },
+      });
+      return {
+        error: false,
+        data: newRole,
+        message: 'Role created successfully',
+      };
+    } catch (error) {
+      console.log(error);
+      return { error: true, message: `createNewRole error: ${error}` };
+    }
+  }
+
+  async getAllRoles() {
+    try {
+      const roles = await this.prisma.role.findMany();
+      return { error: false, data: roles, message: 'Roles found' };
+    } catch (error) {
+      return { error: true, message: `getAllRoles error: ${error}` };
+    }
   }
 }

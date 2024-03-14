@@ -6,39 +6,7 @@ import { CreateBotTokenDto } from './dto/create-data-management.dto';
 export class DataManagementService {
   constructor(private prisma: PrismaService) {}
 
-  createNewUser() {
-    return null;
-  }
-
-  async createNewRole(name: string, maxUsers: number) {
-    try {
-      const newRole = await this.prisma.role.create({
-        data: {
-          name,
-          maxUsers,
-        },
-      });
-      return {
-        error: false,
-        data: newRole,
-        message: 'Role created successfully',
-      };
-    } catch (error) {
-      console.log(error);
-      return { error: true, message: `createNewRole error: ${error}` };
-    }
-  }
-
-  async getAllRoles() {
-    try {
-      const roles = await this.prisma.role.findMany();
-      return { error: false, data: roles, message: 'Roles found' };
-    } catch (error) {
-      return { error: true, message: `getAllRoles error: ${error}` };
-    }
-  }
-
-  async setBotToken(data: CreateBotTokenDto) {
+  async newBotToken(data: CreateBotTokenDto) {
     try {
       const botToken = await this.prisma.botToken.create({
         data,
@@ -62,6 +30,66 @@ export class DataManagementService {
       return { error: false, data: activeBotToken, message: 'Bot token found' };
     } catch (error) {
       return { error: true, message: `getBotToken error: ${error}` };
+    }
+  }
+
+  async activateBotToken(botName: string) {
+    try {
+      const botToken = await this.prisma.botToken.findUnique({
+        where: {
+          botName,
+        },
+      });
+      if (!botToken) {
+        throw new Error('Bot token not found');
+      }
+
+      // First, deactivate all bot tokens
+      await this.prisma.botToken.updateMany({
+        data: {
+          isActivated: false,
+        },
+      });
+
+      // Then, activate the selected bot token
+      await this.prisma.botToken.update({
+        where: {
+          botName,
+        },
+        data: {
+          isActivated: true,
+        },
+      });
+      return {
+        error: false,
+        message: `Bot token activated, ${botToken.botName} - ${botToken.token}`,
+      };
+    } catch (error) {
+      return { error: true, message: `activateBotToken error: ${error}` };
+    }
+  }
+
+  async deleteBotToken(botName: string) {
+    try {
+      const botToken = await this.prisma.botToken.findUnique({
+        where: {
+          botName,
+        },
+      });
+      if (!botToken) {
+        throw new Error('Bot token not found');
+      }
+      await this.prisma.botToken.delete({
+        where: {
+          botName,
+        },
+      });
+      return {
+        error: false,
+        message: `Bot token deleted, ${botToken.botName} - ${botToken.token}`,
+      };
+    } catch (error) {
+      return { error: true, message: `deleteBotToken error: ${error}` };
     }
   }
 }

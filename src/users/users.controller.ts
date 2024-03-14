@@ -12,7 +12,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateRoleDto, CreateUserDto } from './dto/create-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -22,6 +22,19 @@ export class UsersController {
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     return this.checkError(await this.usersService.create(createUserDto));
+  }
+
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  @Post('create-role')
+  async createNewRole(@Body() query: CreateRoleDto) {
+    return this.checkError(
+      await this.usersService.createNewRole(query.name, query.maxUsers),
+    );
+  }
+
+  @Get('roles')
+  async getAllRoles() {
+    return this.checkError(await this.usersService.getAllRoles());
   }
 
   @Get()
@@ -40,8 +53,8 @@ export class UsersController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return this.checkError(await this.usersService.remove(+id));
   }
 
   private checkError(resultStatus: { error: boolean; message: string }) {
