@@ -127,4 +127,17 @@ export class UsersService {
       return { error: true, message: `getAllRoles error: ${error}` };
     }
   }
+
+  async userExists(telegramId: number) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { telegramId },
+      });
+      console.log(user);
+      const userExists = user ? true : false;
+      return { error: false, isUserExists: userExists, message: 'User found' };
+    } catch (error) {
+      return { error: true, message: `getUser error: ${error}` };
+    }
+  }
 }
