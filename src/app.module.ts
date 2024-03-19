@@ -5,6 +5,7 @@ import { TelegrafModule } from './telegraf/telegraf.module';
 import { ConfigModule } from '@nestjs/config';
 import { DataManagementModule } from './data-management/data-management.module';
 import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { UsersModule } from './users/users.module';
     ConfigModule.forRoot(),
     DataManagementModule,
     UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

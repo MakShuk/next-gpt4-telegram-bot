@@ -19,6 +19,7 @@ model User {
   telegramId Int    @unique
   role       Role   @relation(fields: [roleId], references: [id])
   roleId     Int
+  password   String
 }
 
 model Role {
@@ -34,4 +35,3 @@ model BotToken {
   botName     String  @unique
   isActivated Boolean @default(false)
 }
-
