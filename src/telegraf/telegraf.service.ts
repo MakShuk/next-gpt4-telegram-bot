@@ -17,10 +17,13 @@ export class TelegrafService {
 
   async startBot() {
     const botToken = await this.dataManagementService.getBotToken();
+    console.log('c');
     if (botToken.error && !botToken.data) {
       this.logger.error('Ошибка получения токена бота');
       return `Ошибка получения токена бота: ${botToken.message}`;
     }
+
+    
 
     this.bot = new Telegraf(botToken.data.token); // Создаем экземпляр бота
 

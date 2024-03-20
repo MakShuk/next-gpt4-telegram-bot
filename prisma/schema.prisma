@@ -14,12 +14,12 @@ generator client {
 }
 
 model User {
-  id         Int    @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   name       String
-  telegramId Int    @unique
-  role       Role   @relation(fields: [roleId], references: [id])
+  telegramId Int     @unique
+  role       Role    @relation(fields: [roleId], references: [id])
   roleId     Int
-  password   String
+  password   String?
 }
 
 model Role {
