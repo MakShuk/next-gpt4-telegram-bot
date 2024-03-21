@@ -16,5 +16,6 @@ import { UsersService } from 'src/users/users.service';
       useValue: new LoggerService('telegraf'),
     },
   ],
+  exports: [TelegrafService],
 })
 export class TelegrafModule {}

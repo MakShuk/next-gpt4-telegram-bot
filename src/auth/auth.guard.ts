@@ -22,7 +22,6 @@ export class AuthGuard implements CanActivate {
       context.getClass(),
     ]);
     if (isPublic) {
-      // 💡 See this condition
       return true;
     }
 
@@ -35,8 +34,6 @@ export class AuthGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
-      // 💡 Здесь мы назначаем полезную нагрузку объекту запроса,
-      // чтобы мы могли получить к ней доступ в наших обработчиках маршрутов
       request['user'] = payload;
     } catch {
       throw new UnauthorizedException();

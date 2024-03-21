@@ -1,4 +1,7 @@
 {
-  "cSpell.words": ["tslog"],
+  "cSpell.words": [
+    "Openai",
+    "tslog"
+  ],
   "github.copilot.chat.localeOverride": "ru"
 }

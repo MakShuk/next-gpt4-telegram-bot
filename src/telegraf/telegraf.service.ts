@@ -23,8 +23,7 @@ export class TelegrafService {
       return `Ошибка получения токена бота: ${botToken.message}`;
     }
 
-    this.bot = new Telegraf(botToken.data.token); // Создаем экземпляр бота
-
+    this.bot = new Telegraf(botToken.data.token);
     if (this.botRun) {
       this.logger.warn('Бот уже запущен');
       return `Бот уже запущен: ${this.botRun}`;
@@ -32,7 +31,6 @@ export class TelegrafService {
 
     await this.checkUserAccess();
     this.bot.command('t', (ctx) => {
-      console.log(ctx.message.from);
       ctx.reply('Hello');
     });
 
@@ -57,7 +55,7 @@ export class TelegrafService {
       }
 
       if (!isUserExists) {
-        ctx.reply('Access denied.');
+        ctx.reply('Access denied. You are not registered in the system.');
         return;
       }
       return next();

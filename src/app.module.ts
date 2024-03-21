@@ -8,6 +8,8 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
+import { TelegrafService } from './telegraf/telegraf.service';
+import { LoggerService } from './services/logger/logger.service';
 
 @Module({
   imports: [
@@ -23,7 +25,12 @@ import { AuthGuard } from './auth/auth.guard';
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
+    {
+      provide: LoggerService,
+      useValue: new LoggerService('APP'),
+    },
     AppService,
+    TelegrafService,
   ],
 })
 export class AppModule {}
