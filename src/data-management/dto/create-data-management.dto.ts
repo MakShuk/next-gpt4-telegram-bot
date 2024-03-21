@@ -11,3 +11,15 @@ export class CreateBotTokenDto {
   @Length(3, 35)
   readonly botName: string;
 }
+
+export class CreateOpenAiKeyDto {
+  @IsString()
+  @IsNotEmpty()
+  @Length(51, 51)
+  readonly key: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(3, 35)
+  readonly name: string;
+}

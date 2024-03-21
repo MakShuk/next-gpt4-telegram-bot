@@ -9,6 +9,7 @@ import {
 } from 'openai/resources/chat';
 import { ReadStream } from 'fs';
 import { Stream } from 'openai/streaming';
+import { DataManagementService } from 'src/data-management/data-management.service';
 
 export interface ExtendedChatCompletionMessage extends ChatCompletionMessage {
   error?: boolean;
@@ -16,9 +17,16 @@ export interface ExtendedChatCompletionMessage extends ChatCompletionMessage {
 
 @Injectable()
 export class OpenaiService {
-  openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+  constructor(private readonly dataManagementService: DataManagementService) {}
+  openai: OpenAI;
+
+  async onModuleInit() {
+    const openaiKey = await this.dataManagementService.getOpenAiKey();
+    if (openaiKey.error) {
+      throw new Error(`OpenAI key not found: ${openaiKey.message}`);
+    }
+    this.openai = new OpenAI({ apiKey: openaiKey.data.key });
+  }
 
   async response(
     messages: ChatCompletionMessageParam[],

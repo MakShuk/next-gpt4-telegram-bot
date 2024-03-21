@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma/prisma.service';
-import { CreateBotTokenDto } from './dto/create-data-management.dto';
+import {
+  CreateBotTokenDto,
+  CreateOpenAiKeyDto,
+} from './dto/create-data-management.dto';
 
 @Injectable()
 export class DataManagementService {
@@ -95,6 +98,90 @@ export class DataManagementService {
       };
     } catch (error) {
       return { error: true, message: `deleteBotToken error: ${error}` };
+    }
+  }
+
+  async newOpenAiKey(data: CreateOpenAiKeyDto) {
+    try {
+      const gptKey = await this.prisma.openAIKey.create({
+        data,
+      });
+      return {
+        error: false,
+        message: `OpenAI key set successfully, ${gptKey.name} - ${gptKey.key}`,
+      };
+    } catch (error) {
+      return { error: true, message: `newOpenAIKey error: ${error}` };
+    }
+  }
+
+  async getOpenAiKey() {
+    try {
+      const gptKey = await this.prisma.openAIKey.findFirst();
+      if (!gptKey) {
+        throw new Error('OpenAI key not found');
+      }
+      return { error: false, data: gptKey, message: 'OpenAI key found' };
+    } catch (error) {
+      return { error: true, message: `getOpenAIKey error: ${error}` };
+    }
+  }
+
+  async deleteOpenAiKey(name: string) {
+    try {
+      const gptKey = await this.prisma.openAIKey.findUnique({
+        where: {
+          name,
+        },
+      });
+      if (!gptKey) {
+        throw new Error('OpenAI key not found');
+      }
+      await this.prisma.openAIKey.delete({
+        where: {
+          name,
+        },
+      });
+      return {
+        error: false,
+        message: `OpenAI key deleted, ${gptKey.name} - ${gptKey.key}`,
+      };
+    } catch (error) {
+      return { error: true, message: `deleteOpenAIKey error: ${error}` };
+    }
+  }
+
+  async activateOpenAiKey(name: string) {
+    try {
+      const gptKey = await this.prisma.openAIKey.findUnique({
+        where: {
+          name,
+        },
+      });
+      if (!gptKey) {
+        throw new Error('OpenAI key not found');
+      }
+
+      await this.prisma.openAIKey.updateMany({
+        data: {
+          isActivated: false,
+        },
+      });
+
+      await this.prisma.openAIKey.update({
+        where: {
+          name,
+        },
+        data: {
+          isActivated: true,
+        },
+      });
+      return {
+        error: false,
+        message: `OpenAI key activated, ${gptKey.name} - ${gptKey.key}`,
+      };
+    } catch (error) {
+      return { error: true, message: `activateOpenAIKey error: ${error}` };
     }
   }
 }

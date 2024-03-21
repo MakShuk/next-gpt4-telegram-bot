@@ -11,7 +11,10 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { DataManagementService } from './data-management.service';
-import { CreateBotTokenDto } from './dto/create-data-management.dto';
+import {
+  CreateBotTokenDto,
+  CreateOpenAiKeyDto,
+} from './dto/create-data-management.dto';
 
 @Controller('data-management')
 export class DataManagementController {
@@ -39,6 +42,32 @@ export class DataManagementController {
   async deleteBotToken(@Body() query: { botName: string }) {
     return this.checkError(
       await this.dataManagementService.deleteBotToken(query.botName),
+    );
+  }
+
+  @Post('new-open-ai-key')
+  async newOpenAiKey(@Body() query: CreateOpenAiKeyDto) {
+    return this.checkError(
+      await this.dataManagementService.newOpenAiKey(query),
+    );
+  }
+
+  @Get('open-ai-key')
+  async getOpenAiKey() {
+    return this.checkError(await this.dataManagementService.getOpenAiKey());
+  }
+
+  @Delete('open-ai-key')
+  async deleteOpenAiKey(@Body() query: { name: string }) {
+    return this.checkError(
+      await this.dataManagementService.deleteOpenAiKey(query.name),
+    );
+  }
+
+  @Patch('activate-open-ai-key')
+  async activateOpenAiKey(@Body() query: { name: string }) {
+    return this.checkError(
+      await this.dataManagementService.activateOpenAiKey(query.name),
     );
   }
 

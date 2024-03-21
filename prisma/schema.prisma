@@ -35,3 +35,10 @@ model BotToken {
   botName     String  @unique
   isActivated Boolean @default(false)
 }
+
+model OpenAIKey {
+  id          Int     @id @default(autoincrement())
+  key         String  @unique
+  name        String  @unique
+  isActivated Boolean @default(false)
+}

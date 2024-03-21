@@ -10,6 +10,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/auth.guard';
 import { TelegrafService } from './telegraf/telegraf.service';
 import { LoggerService } from './services/logger/logger.service';
+import { OpenaiModule } from './openai/openai.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { LoggerService } from './services/logger/logger.service';
     DataManagementModule,
     UsersModule,
     AuthModule,
+    OpenaiModule,
   ],
   controllers: [AppController],
   providers: [
