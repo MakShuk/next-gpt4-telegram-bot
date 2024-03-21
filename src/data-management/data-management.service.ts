@@ -27,6 +27,11 @@ export class DataManagementService {
           isActivated: true,
         },
       });
+
+      if (!activeBotToken) {
+        throw new Error('Bot token not found');
+      }
+
       return { error: false, data: activeBotToken, message: 'Bot token found' };
     } catch (error) {
       return { error: true, message: `getBotToken error: ${error}` };
