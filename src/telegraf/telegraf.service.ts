@@ -3,8 +3,8 @@ import { DataManagementService } from 'src/data-management/data-management.servi
 import { LoggerService } from 'src/services/logger/logger.service';
 import { UsersService } from 'src/users/users.service';
 import { message } from 'telegraf/filters';
-
-import { Context, Telegraf, session } from 'telegraf';
+import { Telegraf, session } from 'telegraf';
+import { IContextSession } from './telegraf.interface';
 
 @Injectable()
 export class TelegrafService {
@@ -41,11 +41,11 @@ export class TelegrafService {
     return 'Бот запущен';
   }
 
-  creteCommand(command: string, callback: (ctx: Context) => void) {
+  creteCommand(command: string, callback: (ctx: IContextSession) => void) {
     this.bot.command(command, callback);
   }
 
-  textMessage(callback: (ctx: Context) => void) {
+  textMessage(callback: (ctx: IContextSession) => void) {
     this.bot.on(message('text'), callback);
   }
 
@@ -67,6 +67,13 @@ export class TelegrafService {
         ctx.reply('Access denied. You are not registered in the system.');
         return;
       }
+      return next();
+    });
+  }
+
+  saveSession() {
+    this.bot.use(async (ctx: IContextSession, next: () => Promise<void>) => {
+      ctx.session.answerStatus = 'waiting';
       return next();
     });
   }
