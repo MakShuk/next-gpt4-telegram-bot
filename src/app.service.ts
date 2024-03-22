@@ -17,11 +17,20 @@ export class AppService implements OnModuleInit {
     await this.openAiService.onModuleInit();
     await this.telegrafService.botInit();
     this.telegrafService.creteCommand('start', this.startCommands);
+    this.telegrafService.textMessage(this.textMessage);
     await this.telegrafService.startBot();
     return 'Bot started';
   }
 
-  private startCommands(ctx: Context) {
+  private startCommands = (ctx: Context) => {
     ctx.reply('Hello');
-  }
+  };
+
+  private textMessage = async (ctx: Context) => {
+    if ('text' in ctx.message) {
+      const message = this.openAiService.createUserMessage(ctx.message.text);
+      const response = await this.openAiService.response([message]);
+      ctx.reply(response.content || 'No data');
+    }
+  };
 }

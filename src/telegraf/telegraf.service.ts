@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { DataManagementService } from 'src/data-management/data-management.service';
 import { LoggerService } from 'src/services/logger/logger.service';
 import { UsersService } from 'src/users/users.service';
+import { message } from 'telegraf/filters';
 
-import { Context, Telegraf } from 'telegraf';
+import { Context, Telegraf, session } from 'telegraf';
 
 @Injectable()
 export class TelegrafService {
@@ -22,8 +23,8 @@ export class TelegrafService {
       this.logger.error('Ошибка получения токена бота');
       return `Ошибка получения токена бота: ${botToken.message}`;
     }
-
     this.bot = new Telegraf(botToken.data.token);
+    this.sessionOn();
   }
 
   async startBot() {
@@ -42,6 +43,10 @@ export class TelegrafService {
 
   creteCommand(command: string, callback: (ctx: Context) => void) {
     this.bot.command(command, callback);
+  }
+
+  textMessage(callback: (ctx: Context) => void) {
+    this.bot.on(message('text'), callback);
   }
 
   private async checkUserAccess() {
@@ -64,5 +69,9 @@ export class TelegrafService {
       }
       return next();
     });
+  }
+
+  private async sessionOn() {
+    this.bot.use(session());
   }
 }
