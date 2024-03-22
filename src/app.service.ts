@@ -5,7 +5,6 @@ import { OpenaiService } from './openai/openai.service';
 import { Context } from 'telegraf';
 import { IContextSession } from './telegraf/telegraf.interface';
 
-
 @Injectable()
 export class AppService implements OnModuleInit {
   onModuleInit() {
@@ -29,18 +28,28 @@ export class AppService implements OnModuleInit {
   };
 
   private textMessage = async (ctx: IContextSession) => {
-    console.log(ctx.session);
-    ctx.session ??= { answerStatus: 'answered' };
-    if ('text' in ctx.message && ctx.session.answerStatus === 'answered') {
-      ctx.session.answerStatus = 'waiting';
-      console.log('Запрос:', ctx.message.text);
+    console.log('session', ctx.session);
+
+    ctx.session = ctx.session || { time: 0 };
+
+    if (!this.checkTime(ctx)) {
+      console.log('Время не прошло');
+      await ctx.reply('🚧 Не успеваю за вами...');
+      return;
+    }
+
+    if ('text' in ctx.message) {
       const message = this.openAiService.createUserMessage(ctx.message.text);
       const response = await this.openAiService.response([message]);
-      ctx.session.answerStatus = 'answered';
       ctx.reply(response.content || 'No data');
     } else {
       console.log('Ответ в процессе');
-      ctx.reply('Ответ в процессе');
+      return;
     }
   };
+
+  checkTime = (context: any): boolean =>
+    context.message.date >= context.session.time
+      ? ((context.session.time = context.message.date + 6), true)
+      : false;
 }

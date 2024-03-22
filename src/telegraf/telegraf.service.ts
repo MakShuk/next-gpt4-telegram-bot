@@ -4,7 +4,7 @@ import { LoggerService } from 'src/services/logger/logger.service';
 import { UsersService } from 'src/users/users.service';
 import { message } from 'telegraf/filters';
 import { Telegraf, session } from 'telegraf';
-import { IContextSession } from './telegraf.interface';
+import { Context } from 'telegraf';
 
 @Injectable()
 export class TelegrafService {
@@ -41,11 +41,11 @@ export class TelegrafService {
     return 'Бот запущен';
   }
 
-  creteCommand(command: string, callback: (ctx: IContextSession) => void) {
+  creteCommand(command: string, callback: (ctx: Context) => void) {
     this.bot.command(command, callback);
   }
 
-  textMessage(callback: (ctx: IContextSession) => void) {
+  textMessage(callback: (ctx: Context) => void) {
     this.bot.on(message('text'), callback);
   }
 
@@ -71,12 +71,12 @@ export class TelegrafService {
     });
   }
 
-  saveSession() {
+  /*   setWaitingStatus(ctx: IContextSession) {
     this.bot.use(async (ctx: IContextSession, next: () => Promise<void>) => {
       ctx.session.answerStatus = 'waiting';
       return next();
     });
-  }
+  } */
 
   private async sessionOn() {
     this.bot.use(session());
