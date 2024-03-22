@@ -7,5 +7,6 @@ import { DataManagementModule } from 'src/data-management/data-management.module
   imports: [DataManagementModule],
   providers: [OpenaiService],
   controllers: [OpenaiController],
+  exports: [OpenaiService],
 })
 export class OpenaiModule {}

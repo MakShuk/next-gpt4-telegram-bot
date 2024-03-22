@@ -11,6 +11,7 @@ import { AuthGuard } from './auth/auth.guard';
 import { TelegrafService } from './telegraf/telegraf.service';
 import { LoggerService } from './services/logger/logger.service';
 import { OpenaiModule } from './openai/openai.module';
+import { OpenaiService } from './openai/openai.service';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { OpenaiModule } from './openai/openai.module';
     },
     AppService,
     TelegrafService,
+    OpenaiService,
   ],
 })
 export class AppModule {}

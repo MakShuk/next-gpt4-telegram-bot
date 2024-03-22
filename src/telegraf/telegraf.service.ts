@@ -15,7 +15,7 @@ export class TelegrafService {
   private bot: Telegraf;
   private botRun: false | Date = false;
 
-  async startBot() {
+  async botInit() {
     const botToken = await this.dataManagementService.getBotToken();
 
     if (botToken.error && !botToken.data) {
@@ -24,15 +24,15 @@ export class TelegrafService {
     }
 
     this.bot = new Telegraf(botToken.data.token);
+  }
+
+  async startBot() {
     if (this.botRun) {
       this.logger.warn('Бот уже запущен');
       return `Бот уже запущен: ${this.botRun}`;
     }
 
     await this.checkUserAccess();
-    this.bot.command('t', (ctx) => {
-      ctx.reply('Hello');
-    });
 
     this.bot.launch();
     this.logger.info('Бот запущен');
@@ -40,7 +40,11 @@ export class TelegrafService {
     return 'Бот запущен';
   }
 
-  async checkUserAccess() {
+  creteCommand(command: string, callback: (ctx: Context) => void) {
+    this.bot.command(command, callback);
+  }
+
+  private async checkUserAccess() {
     this.bot.use(async (ctx: Context, next: () => Promise<void>) => {
       const userId = ctx.from?.id;
 
