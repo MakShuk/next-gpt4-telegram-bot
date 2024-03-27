@@ -5,7 +5,6 @@ import { UsersService } from 'src/users/users.service';
 import { message } from 'telegraf/filters';
 import { Telegraf, session } from 'telegraf';
 import { Context } from 'telegraf';
-import { IBotContext } from './context/context.interface';
 
 @Injectable()
 export class TelegrafService {
@@ -14,7 +13,7 @@ export class TelegrafService {
     private readonly dataManagementService: DataManagementService,
     private readonly usersService: UsersService,
   ) {}
-  private bot: Telegraf<IBotContext>;
+  private bot: Telegraf;
   private botRun: false | Date = false;
 
   async botInit() {
@@ -24,7 +23,7 @@ export class TelegrafService {
       this.logger.error('Ошибка получения токена бота');
       return `Ошибка получения токена бота: ${botToken.message}`;
     }
-    this.bot = new Telegraf<IBotContext>(botToken.data.token);
+    this.bot = new Telegraf(botToken.data.token);
     this.sessionOn();
   }
 

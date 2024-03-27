@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { TelegrafService } from './telegraf/telegraf.service';
 import { OnModuleInit } from '@nestjs/common';
 import { OpenaiService } from './openai/openai.service';
-import { IBotContext } from './commands/commands.interface';
 import { Commands } from './commands/commands';
+import { IBotContext } from './commands/commands.interface';
 
 @Injectable()
 export class AppService implements OnModuleInit {
@@ -31,13 +31,6 @@ export class AppService implements OnModuleInit {
       console.error('Error starting bot:', error);
     }
   }
-
-  private startCommand = (ctx: IBotContext) => {
-    ctx.session = ctx.session || { time: 0, message: [] };
-    ctx.reply(
-      '🤖 Привет! Я здесь, чтобы помочь вам. Задайте мне любой вопрос, и я постараюсь на него ответить. Давайте начнем!',
-    );
-  };
 
   private resetCommand = (ctx: IBotContext) => {
     ctx.session = ctx.session || { time: 0, message: [] };
