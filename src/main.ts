@@ -2,8 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(2999);
-  console.log('Бот запущен на порту 2999');
+  try {
+    const app = await NestFactory.create(AppModule);
+    const port = process.env.PORT || 2999;
+    await app.listen(port);
+    console.log(`Бот запущен на порту ${port}`);
+  } catch (error) {
+    console.error('Ошибка при запуске приложения:', error);
+  }
 }
+
 bootstrap();

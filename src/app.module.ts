@@ -12,7 +12,7 @@ import { TelegrafService } from './telegraf/telegraf.service';
 import { LoggerService } from './services/logger/logger.service';
 import { OpenaiModule } from './openai/openai.module';
 import { OpenaiService } from './openai/openai.service';
-import { Commands } from './commands/commands';
+import { CommandsService } from './commands/commands';
 
 @Module({
   imports: [
@@ -22,6 +22,7 @@ import { Commands } from './commands/commands';
     UsersModule,
     AuthModule,
     OpenaiModule,
+    ConfigModule,
   ],
   controllers: [AppController],
   providers: [
@@ -36,7 +37,7 @@ import { Commands } from './commands/commands';
     AppService,
     TelegrafService,
     OpenaiService,
-    Commands,
+    CommandsService,
   ],
 })
 export class AppModule {}
