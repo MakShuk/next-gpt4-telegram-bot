@@ -35,7 +35,10 @@ export class UsersService {
       });
       return { error: false, data: newUser, message: 'User created' };
     } catch (error) {
-      return { error: true, message: `createUser error: ${error.message}` };
+      return {
+        error: true,
+        message: `createUser error: ${(error as Error).message}`,
+      };
     }
   }
 
@@ -44,7 +47,10 @@ export class UsersService {
       const allUsers = await this.prisma.user.findMany();
       return { error: false, data: allUsers, message: 'Users found' };
     } catch (error) {
-      return { error: true, message: `getUsers error: ${error}` };
+      return {
+        error: true,
+        message: `getUsers error: ${(error as Error).message}`,
+      };
     }
   }
 
@@ -76,7 +82,10 @@ export class UsersService {
       });
       return { error: false, data: updatedUser, message: 'User updated' };
     } catch (error) {
-      return { error: true, message: `updateUser error: ${error}` };
+      return {
+        error: true,
+        message: `updateUser error: ${(error as Error).message}`,
+      };
     }
   }
 
@@ -96,7 +105,10 @@ export class UsersService {
       });
       return { error: false, message: 'User deleted' };
     } catch (error) {
-      return { error: true, message: `deleteUser error: ${error.message}` };
+      return {
+        error: true,
+        message: `deleteUser error: ${(error as Error).message}`,
+      };
     }
   }
 
@@ -124,7 +136,10 @@ export class UsersService {
       const roles = await this.prisma.role.findMany();
       return { error: false, data: roles, message: 'Roles found' };
     } catch (error) {
-      return { error: true, message: `getAllRoles error: ${error}` };
+      return {
+        error: true,
+        message: `getAllRoles error: ${(error as Error).message}`,
+      };
     }
   }
 
@@ -137,7 +152,10 @@ export class UsersService {
       const userExists = user ? true : false;
       return { error: false, isUserExists: userExists, message: 'User found' };
     } catch (error) {
-      return { error: true, message: `getUser error: ${error}` };
+      return {
+        error: true,
+        message: `getUser error: ${(error as Error).message}`,
+      };
     }
   }
 }

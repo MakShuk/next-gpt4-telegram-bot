@@ -5,6 +5,7 @@ import { UsersService } from 'src/users/users.service';
 import { message } from 'telegraf/filters';
 import { Telegraf, session } from 'telegraf';
 import { Context } from 'telegraf';
+import { IBotContext } from './context/context.interface';
 
 @Injectable()
 export class TelegrafService {
@@ -13,7 +14,7 @@ export class TelegrafService {
     private readonly dataManagementService: DataManagementService,
     private readonly usersService: UsersService,
   ) {}
-  private bot: Telegraf;
+  private bot: Telegraf<IBotContext>;
   private botRun: false | Date = false;
 
   async botInit() {
@@ -23,7 +24,7 @@ export class TelegrafService {
       this.logger.error('Ошибка получения токена бота');
       return `Ошибка получения токена бота: ${botToken.message}`;
     }
-    this.bot = new Telegraf(botToken.data.token);
+    this.bot = new Telegraf<IBotContext>(botToken.data.token);
     this.sessionOn();
   }
 
@@ -49,9 +50,13 @@ export class TelegrafService {
     this.bot.on(message('text'), callback);
   }
 
+  repostMessage(callback: (ctx: Context) => void) {
+    this.bot.on('message', callback);
+  }
+
   private async checkUserAccess() {
     this.bot.use(async (ctx: Context, next: () => Promise<void>) => {
-      const userId = ctx.from?.id;
+      const userId = ctx.from.id;
 
       const { error, isUserExists, message } =
         await this.usersService.userExists(userId);
@@ -64,19 +69,14 @@ export class TelegrafService {
       }
 
       if (!isUserExists) {
-        ctx.reply('Access denied. You are not registered in the system.');
+        ctx.reply(
+          `Access denied. You are not registered in the system. Contact the administrator to provide this number: ${userId}`,
+        );
         return;
       }
       return next();
     });
   }
-
-  /*   setWaitingStatus(ctx: IContextSession) {
-    this.bot.use(async (ctx: IContextSession, next: () => Promise<void>) => {
-      ctx.session.answerStatus = 'waiting';
-      return next();
-    });
-  } */
 
   private async sessionOn() {
     this.bot.use(session());
