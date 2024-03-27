@@ -5,22 +5,23 @@ import { OpenaiService } from 'src/openai/openai.service';
 @Injectable()
 export class CommandsService {
   constructor(private openAiService: OpenaiService) {}
+
   start = (ctx: IBotContext) => {
-    ctx.session = ctx.session || { time: 0, message: [] };
+    this.initializeSession(ctx);
     ctx.reply(
       '🤖 Привет! Я здесь, чтобы помочь вам. Задайте мне любой вопрос, и я постараюсь на него ответить. Давайте начнем!',
     );
   };
 
   reset = (ctx: IBotContext) => {
-    ctx.session = ctx.session || { time: 0, message: [] };
+    this.initializeSession(ctx);
     ctx.session.message = [];
     ctx.reply('⤵️ Контекст сброшен, диалог начат заново');
   };
 
   textMessage = async (ctx: IBotContext) => {
     try {
-      ctx.session = ctx.session || { time: 0, message: [] };
+      this.initializeSession(ctx);
       console.log('textMessage', ctx.session.message);
 
       if (!this.checkTime(ctx)) {
@@ -41,14 +42,13 @@ export class CommandsService {
         );
       }
     } catch (error) {
-      console.error(error);
-      await ctx.reply('⚠️ Произошла ошибка. Попробуйте еще раз.');
+      this.handleError(error, ctx);
     }
   };
 
   repostMessage = async (ctx: IBotContext) => {
     try {
-      ctx.session = ctx.session || { time: 0, message: [] };
+      this.initializeSession(ctx);
       console.log('repostMessage', ctx.session.message);
       if ('caption' in ctx.message) {
         ctx.session.message.push(
@@ -57,8 +57,17 @@ export class CommandsService {
         ctx.reply('❓Задайте вопрос, по этому материалу');
       }
     } catch (error) {
-      console.error(error);
+      this.handleError(error, ctx);
     }
+  };
+
+  private initializeSession = (ctx: IBotContext) => {
+    ctx.session = ctx.session || { time: 0, message: [] };
+  };
+
+  private handleError = async (error: any, ctx: IBotContext) => {
+    console.error(error);
+    await ctx.reply('⚠️ Произошла ошибка. Попробуйте еще раз.');
   };
 
   private checkTime = (context: IBotContext): boolean =>

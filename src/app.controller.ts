@@ -6,7 +6,12 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  async getHello(): Promise<string> {
-    return await this.appService.startBot();
+  async startBot(): Promise<string> {
+    try {
+      return await this.appService.startBot();
+    } catch (error) {
+      console.error('Ошибка при запуске бота:', error);
+      throw error;
+    }
   }
 }

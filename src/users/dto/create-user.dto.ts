@@ -1,33 +1,36 @@
 import { IsInt, IsNotEmpty, IsString, Length, Max, Min } from 'class-validator';
 
-export class CreateUserDto {
+const NAME_MIN_LENGTH = 3;
+const NAME_MAX_LENGTH = 40;
+const ID_MIN_VALUE = 999;
+const ID_MAX_VALUE = 999_999_999;
+const ROLE_ID_MIN_VALUE = 1;
+const ROLE_ID_MAX_VALUE = 10;
+
+class NameDto {
   @IsString()
   @IsNotEmpty()
-  @Length(3, 40)
+  @Length(NAME_MIN_LENGTH, NAME_MAX_LENGTH)
   readonly name: string;
-
+}
+export class CreateUserDto extends NameDto {
   @IsInt()
   @IsNotEmpty()
-  @Min(999)
-  @Max(999_999_999)
+  @Min(ID_MIN_VALUE)
+  @Max(ID_MAX_VALUE)
   readonly telegramId: number;
 
   @IsInt()
   @IsNotEmpty()
-  @Min(1)
-  @Max(10)
+  @Min(ROLE_ID_MIN_VALUE)
+  @Max(ROLE_ID_MAX_VALUE)
   readonly roleId: number;
 }
 
-export class CreateRoleDto {
-  @IsString()
-  @IsNotEmpty()
-  @Length(3, 15)
-  readonly name: string;
-
+export class CreateRoleDto extends NameDto {
   @IsInt()
   @IsNotEmpty()
-  @Min(1)
-  @Max(999_999_999)
+  @Min(ROLE_ID_MIN_VALUE)
+  @Max(ID_MAX_VALUE)
   readonly maxUsers: number;
 }
