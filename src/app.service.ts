@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { TelegrafService } from './telegraf/telegraf.service';
 import { OnModuleInit } from '@nestjs/common';
 import { OpenaiService } from './openai/openai.service';
-import { IBotContext } from './telegraf/context/context.interface';
+import { IBotContext } from './commands/commands.interface';
+import { Commands } from './commands/commands';
 
 @Injectable()
 export class AppService implements OnModuleInit {
@@ -12,13 +13,15 @@ export class AppService implements OnModuleInit {
   constructor(
     private telegrafService: TelegrafService,
     private openAiService: OpenaiService,
+    private command: Commands,
   ) {}
 
   async startBot(): Promise<string> {
+    console.log(this.command);
     try {
       await this.openAiService.onModuleInit();
       await this.telegrafService.botInit();
-      this.telegrafService.creteCommand('start', this.startCommand);
+      this.telegrafService.creteCommand('start', this.command.start);
       this.telegrafService.creteCommand('reset', this.resetCommand);
       this.telegrafService.textMessage(this.textMessage);
       this.telegrafService.repostMessage(this.repostMessage);

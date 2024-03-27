@@ -12,6 +12,7 @@ import { TelegrafService } from './telegraf/telegraf.service';
 import { LoggerService } from './services/logger/logger.service';
 import { OpenaiModule } from './openai/openai.module';
 import { OpenaiService } from './openai/openai.service';
+import { Commands } from './commands/commands';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { OpenaiService } from './openai/openai.service';
     AppService,
     TelegrafService,
     OpenaiService,
+    Commands,
   ],
 })
 export class AppModule {}
