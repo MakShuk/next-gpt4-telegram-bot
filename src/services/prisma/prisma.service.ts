@@ -8,7 +8,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
       await this.$connect();
     } catch (e) {
       throw new Error(
-        'Ошибка подключения к базе данных, отсутствует фаил конфигурации',
+        `Ошибка подключения к базе данных, отсутствует файл конфигурации. Детали ошибки: ${(e as Error).message}`,
       );
     }
   }
