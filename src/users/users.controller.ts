@@ -10,22 +10,24 @@ import {
   HttpStatus,
   UsePipes,
   ValidationPipe,
+  HttpCode,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateRoleDto, CreateUserDto } from './dto/create-user.dto';
 
+@UsePipes(new ValidationPipe({ whitelist: true }))
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @UsePipes(new ValidationPipe({ whitelist: true }))
   @Post()
+  @HttpCode(201)
   async create(@Body() createUserDto: CreateUserDto) {
     return this.checkError(await this.usersService.create(createUserDto));
   }
 
-  @UsePipes(new ValidationPipe({ whitelist: true }))
   @Post('create-role')
+  @HttpCode(201)
   async createNewRole(@Body() query: CreateRoleDto) {
     return this.checkError(
       await this.usersService.createNewRole(query.name, query.maxUsers),
@@ -53,6 +55,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   async remove(@Param('id') id: string) {
     return this.checkError(await this.usersService.remove(+id));
   }

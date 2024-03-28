@@ -54,11 +54,14 @@ export class TelegrafService {
   }
 
   private async checkUserAccess() {
+    console.log('checkUserAccess');
     this.bot.use(async (ctx: Context, next: () => Promise<void>) => {
       const userId = ctx.from.id;
-
-      const { error, isUserExists, message } =
-        await this.usersService.userExists(userId);
+      const {
+        error,
+        data: isUserExists,
+        message,
+      } = await this.usersService.userExists(userId);
       this.logger.info(
         `Проверка доступа пользователя ${userId}, isUserExists: ${isUserExists}`,
       );
