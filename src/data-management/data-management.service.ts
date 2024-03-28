@@ -52,14 +52,12 @@ export class DataManagementService {
         throw new Error('Bot token not found');
       }
 
-      // First, deactivate all bot tokens
       await this.prisma.botToken.updateMany({
         data: {
           isActivated: false,
         },
       });
 
-      // Then, activate the selected bot token
       await this.prisma.botToken.update({
         where: {
           botName,

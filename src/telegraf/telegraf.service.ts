@@ -25,6 +25,7 @@ export class TelegrafService {
     }
     this.bot = new Telegraf(botToken.data.token);
     this.sessionOn();
+    await this.checkUserAccess();
   }
 
   async startBot() {
@@ -32,8 +33,6 @@ export class TelegrafService {
       this.logger.warn('Бот уже запущен');
       return `Бот уже запущен: ${this.botRun}`;
     }
-
-    await this.checkUserAccess();
 
     this.bot.launch();
     this.logger.info('Бот запущен');
@@ -54,8 +53,9 @@ export class TelegrafService {
   }
 
   private async checkUserAccess() {
-    console.log('checkUserAccess');
+    console.log(this.bot);
     this.bot.use(async (ctx: Context, next: () => Promise<void>) => {
+      console.log('bot.use');
       const userId = ctx.from.id;
       const {
         error,

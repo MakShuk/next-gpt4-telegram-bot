@@ -1,8 +1,13 @@
 {
   "cSpell.words": [
     "Openai",
+    "Pipes",
     "repost",
+    "successfully",
+    "telegram",
     "tslog"
   ],
-  "github.copilot.chat.localeOverride": "ru"
+  "github.copilot.chat.localeOverride": "ru",
+  "accessibility.voice.speechLanguage": "ru-RU",
+  "cSpell.language": "ru"
 }

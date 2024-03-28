@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpException,
   HttpStatus,
   Patch,
@@ -22,6 +23,7 @@ export class DataManagementController {
 
   @UsePipes(new ValidationPipe({ whitelist: true }))
   @Post('new-bot-token')
+  @HttpCode(201)
   async newBotToken(@Body() query: CreateBotTokenDto) {
     return this.checkError(await this.dataManagementService.newBotToken(query));
   }
@@ -58,6 +60,7 @@ export class DataManagementController {
   }
 
   @Delete('open-ai-key')
+  @HttpCode(204)
   async deleteOpenAiKey(@Body() query: { name: string }) {
     return this.checkError(
       await this.dataManagementService.deleteOpenAiKey(query.name),
