@@ -22,7 +22,7 @@ export class AppService implements OnModuleInit {
       this.telegrafService.createCommand('start', this.command.start);
       this.telegrafService.createCommand('reset', this.command.reset);
       this.telegrafService.textMessage(this.command.text);
-      this.telegrafService.repostMessage(this.command.repost);
+      this.telegrafService.repostMessage(this.command.repostAndImage);
       this.telegrafService.imageMessage();
       await this.telegrafService.startBot();
       return 'Bot started';

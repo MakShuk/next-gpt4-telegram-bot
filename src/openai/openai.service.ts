@@ -89,7 +89,9 @@ export class OpenaiService {
     }
   }
 
-  async imageResponse(messages: ChatCompletionMessageParam[]) {
+  async imageResponse(
+    messages: ChatCompletionMessageParam[],
+  ): Promise<ExtendedChatCompletionMessage> {
     try {
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4-vision-preview',

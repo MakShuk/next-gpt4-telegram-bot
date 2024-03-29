@@ -51,45 +51,52 @@ export class CommandsService {
     }
   };
 
-  repost = async (ctx: IBotContext) => {
+  repostAndImage = async (ctx: IBotContext) => {
     try {
       this.initializeSession(ctx);
-      console.log('repostMessage', ctx);
-      if ('caption' in ctx.message) {
-        console.log('repostMessage', ctx.message.caption);
-        ctx.session.message.push(
-          this.openAiService.createAssistantMessage(ctx.message.caption),
-        );
-        ctx.reply('❓Задайте вопрос, по этому материалу');
+      if ('caption' in ctx.message && !('photo' in ctx.message)) {
+        console.log('Действие при наличии Caption');
+        this.processCaption(ctx);
       }
 
       if ('photo' in ctx.message) {
-        const photo = ctx.message.photo[ctx.message.photo.length - 1];
-        const photoUrl = await ctx.telegram.getFileLink(photo.file_id);
-        console.log('Photo URL:', photoUrl.href);
-        const message = this.openAiService.createImageUserMessage(
-          'Что это',
-          photoUrl.href,
-        );
-        // ctx.session.message.push(message);
-
-        const response = await this.openAiService.imageResponse([message]);
-        ctx.session.message.push(
-          this.openAiService.createAssistantMessage(response.content),
-        );
-        ctx.reply(response.content);
+        console.log('Распознавание фото');
+        await this.processPhoto(ctx);
       }
     } catch (error) {
       this.handleError(error, ctx);
     }
   };
 
-  image = async (ctx: IBotContext) => {
-    try {
-      console.log('repostMessage', ctx);
-    } catch (error) {
-      this.handleError(error, ctx);
+  private processCaption = (ctx: IBotContext) => {
+    if (!('caption' in ctx.message)) return;
+    ctx.session.message.push(
+      this.openAiService.createAssistantMessage(ctx.message.caption),
+    );
+    ctx.reply('❓Задайте вопрос, по этому материалу');
+  };
+
+  private processPhoto = async (ctx: IBotContext) => {
+    if (!('caption' in ctx.message)) return;
+    if (!('photo' in ctx.message)) return;
+    const photo = ctx.message.photo[ctx.message.photo.length - 1];
+    const photoUrl = await ctx.telegram.getFileLink(photo.file_id);
+    const message = this.openAiService.createImageUserMessage(
+      `${ctx.message.caption || 'Что на картинке?'}`,
+      photoUrl.href,
+    );
+    ctx.reply('🔄 Подождите, идет обработка фото...');
+    const response = await this.openAiService.imageResponse([message]);
+
+    if (response.error) {
+      ctx.reply(response.content);
+      throw new Error(response.content);
     }
+
+    ctx.session.message.push(
+      this.openAiService.createAssistantMessage(response.content),
+    );
+    ctx.reply(response.content);
   };
 
   private initializeSession = (ctx: IBotContext) => {
