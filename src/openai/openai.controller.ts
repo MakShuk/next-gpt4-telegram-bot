@@ -38,6 +38,15 @@ export class OpenaiController {
     }
   }
 
+  @Get('image-response')
+  async imageResponse() {
+    const messages = this.openaiService.createImageUserMessage(
+      'Что на картинке?',
+      'https://docs.nestjs.com/assets/Controllers_1.png',
+    );
+    return await this.openaiService.imageResponse([messages]);
+  }
+
   @Get('file-uploads')
   fileUploads(): Promise<void> {
     return this.openaiService.fileUploads();

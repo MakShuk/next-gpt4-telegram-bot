@@ -89,6 +89,35 @@ export class OpenaiService {
     }
   }
 
+  async imageResponse(messages: ChatCompletionMessageParam[]) {
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: 'gpt-4-vision-preview',
+        messages: messages,
+      });
+      if (!completion.choices[0]?.message)
+        throw new Error('openai.chat.completions is undefined');
+      return completion.choices[0]?.message;
+    } catch (error) {
+      if (error instanceof OpenAI.APIError) {
+        const { status, message, code, type } = error;
+        const errorMessage = `status: ${status} message: ${message} code: ${code} type: ${type}`;
+        console.error(errorMessage);
+        return {
+          role: 'assistant',
+          content: errorMessage,
+          error: true,
+        };
+      } else {
+        return {
+          role: 'assistant',
+          content: `Non-API error, ${error}`,
+          error: true,
+        };
+      }
+    }
+  }
+
   async transcriptionAudio(
     audioStream: ReadStream,
   ): Promise<ExtendedChatCompletionMessage> {
@@ -139,6 +168,24 @@ export class OpenaiService {
     return {
       role: 'assistant',
       content: message,
+    };
+  }
+
+  createImageUserMessage(
+    message: string,
+    url: string,
+  ): ChatCompletionMessageParam {
+    return {
+      role: 'user',
+      content: [
+        { type: 'text', text: message },
+        {
+          type: 'image_url',
+          image_url: {
+            url: url,
+          },
+        },
+      ],
     };
   }
 }

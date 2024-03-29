@@ -19,7 +19,7 @@ export class CommandsService {
     ctx.reply('⤵️ Контекст сброшен, диалог начат заново');
   };
 
-  textMessage = async (ctx: IBotContext) => {
+  text = async (ctx: IBotContext) => {
     try {
       this.initializeSession(ctx);
       console.log('textMessage', ctx.session.message);
@@ -34,6 +34,11 @@ export class CommandsService {
         ctx.reply('🔄 Подождите, идет обработка запроса...');
         const response = await this.openAiService.response(ctx.session.message);
 
+        if (response.error) {
+          ctx.reply(response.content);
+          throw new Error(response.content);
+        }
+
         ctx.reply(response.content, {
           parse_mode: 'Markdown',
         });
@@ -46,16 +51,42 @@ export class CommandsService {
     }
   };
 
-  repostMessage = async (ctx: IBotContext) => {
+  repost = async (ctx: IBotContext) => {
     try {
       this.initializeSession(ctx);
-      console.log('repostMessage', ctx.session.message);
+      console.log('repostMessage', ctx);
       if ('caption' in ctx.message) {
+        console.log('repostMessage', ctx.message.caption);
         ctx.session.message.push(
           this.openAiService.createAssistantMessage(ctx.message.caption),
         );
         ctx.reply('❓Задайте вопрос, по этому материалу');
       }
+
+      if ('photo' in ctx.message) {
+        const photo = ctx.message.photo[ctx.message.photo.length - 1];
+        const photoUrl = await ctx.telegram.getFileLink(photo.file_id);
+        console.log('Photo URL:', photoUrl.href);
+        const message = this.openAiService.createImageUserMessage(
+          'Что это',
+          photoUrl.href,
+        );
+        // ctx.session.message.push(message);
+
+        const response = await this.openAiService.imageResponse([message]);
+        ctx.session.message.push(
+          this.openAiService.createAssistantMessage(response.content),
+        );
+        ctx.reply(response.content);
+      }
+    } catch (error) {
+      this.handleError(error, ctx);
+    }
+  };
+
+  image = async (ctx: IBotContext) => {
+    try {
+      console.log('repostMessage', ctx);
     } catch (error) {
       this.handleError(error, ctx);
     }

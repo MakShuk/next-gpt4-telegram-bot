@@ -19,10 +19,11 @@ export class AppService implements OnModuleInit {
     try {
       await this.openAiService.onModuleInit();
       await this.telegrafService.botInit();
-      this.telegrafService.creteCommand('start', this.command.start);
-      this.telegrafService.creteCommand('reset', this.command.reset);
-      this.telegrafService.textMessage(this.command.textMessage);
-      this.telegrafService.repostMessage(this.command.repostMessage);
+      this.telegrafService.createCommand('start', this.command.start);
+      this.telegrafService.createCommand('reset', this.command.reset);
+      this.telegrafService.textMessage(this.command.text);
+      this.telegrafService.repostMessage(this.command.repost);
+      this.telegrafService.imageMessage();
       await this.telegrafService.startBot();
       return 'Bot started';
     } catch (error) {

@@ -24,7 +24,10 @@ export class TelegrafService {
       return `Ошибка получения токена бота: ${botToken.message}`;
     }
     this.bot = new Telegraf(botToken.data.token);
-    this.sessionOn();
+    this.bot.use(session());
+    this.bot.catch((err: any, ctx: Context) => {
+      console.log(`Ooops, encountered an error for ${ctx.updateType}`, err);
+    });
     await this.checkUserAccess();
   }
 
@@ -40,7 +43,7 @@ export class TelegrafService {
     return 'Бот запущен';
   }
 
-  creteCommand(command: string, callback: (ctx: Context) => void) {
+  createCommand(command: string, callback: (ctx: Context) => void) {
     this.bot.command(command, callback);
   }
 
@@ -52,25 +55,32 @@ export class TelegrafService {
     this.bot.on('message', callback);
   }
 
+  imageMessage() {
+    this.bot.on('photo', (ctx: Context) => {
+      console.log('photo');
+      console.log(ctx.message);
+      ctx.reply('🚧 В разработке');
+    });
+  }
+
   private async checkUserAccess() {
-    console.log(this.bot);
     this.bot.use(async (ctx: Context, next: () => Promise<void>) => {
-      console.log('bot.use');
+      //  console.log(ctx);
       const userId = ctx.from.id;
       const {
         error,
-        data: isUserExists,
+        data: UserData,
         message,
       } = await this.usersService.userExists(userId);
       this.logger.info(
-        `Проверка доступа пользователя ${userId}, isUserExists: ${isUserExists}`,
+        `Проверка доступа пользователя ${userId} ${UserData ? UserData.name + ' прошла успешно' : 'доступ запрещен'}`,
       );
       if (error) {
         ctx.reply(message);
         return;
       }
 
-      if (!isUserExists) {
+      if (!UserData) {
         ctx.reply(
           `Access denied. You are not registered in the system. Contact the administrator to provide this number: ${userId}`,
         );
@@ -78,9 +88,5 @@ export class TelegrafService {
       }
       return next();
     });
-  }
-
-  private async sessionOn() {
-    this.bot.use(session());
   }
 }
