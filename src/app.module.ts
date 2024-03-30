@@ -16,8 +16,10 @@ import { CommandsService } from './commands/commands';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: '../prisma/.env',
+    }),
     TelegrafModule,
-    ConfigModule.forRoot(),
     DataManagementModule,
     UsersModule,
     AuthModule,

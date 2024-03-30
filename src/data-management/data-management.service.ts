@@ -27,7 +27,7 @@ export class DataManagementService {
     try {
       const activeBotToken = await this.prisma.botToken.findFirst({
         where: {
-          isActivated: true,
+          development: process.env.DEV_MODE === 'true' ? true : false,
         },
       });
 
@@ -41,7 +41,7 @@ export class DataManagementService {
     }
   }
 
-  async activateBotToken(botName: string) {
+  async setDevBotToken(botName: string) {
     try {
       const botToken = await this.prisma.botToken.findUnique({
         where: {
@@ -54,7 +54,7 @@ export class DataManagementService {
 
       await this.prisma.botToken.updateMany({
         data: {
-          isActivated: false,
+          development: false,
         },
       });
 
@@ -63,7 +63,7 @@ export class DataManagementService {
           botName,
         },
         data: {
-          isActivated: true,
+          development: true,
         },
       });
       return {

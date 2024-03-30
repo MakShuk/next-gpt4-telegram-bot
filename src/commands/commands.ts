@@ -22,8 +22,6 @@ export class CommandsService {
   text = async (ctx: IBotContext) => {
     try {
       this.initializeSession(ctx);
-      console.log('textMessage', ctx.session.message);
-
       if (!this.checkTime(ctx)) {
         await ctx.reply('🚧 Не успеваю за вами...');
         return;

@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  api-gpt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: GPT_Telegram_Bot
+    ports:
+      - 2999:2999
+    restart: always
+    networks:
+      - home
+networks:
+  home:
+    driver: bridge

@@ -36,7 +36,7 @@ export class DataManagementController {
   @Patch('activate-bot-token')
   async activateBotToken(@Body() query: { botName: string }) {
     return this.checkError(
-      await this.dataManagementService.activateBotToken(query.botName),
+      await this.dataManagementService.setDevBotToken(query.botName),
     );
   }
 

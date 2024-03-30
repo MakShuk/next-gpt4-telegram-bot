@@ -38,7 +38,9 @@ export class TelegrafService {
     }
 
     this.bot.launch();
-    this.logger.info('Бот запущен');
+    this.logger.info(
+      `Бот запущен ${process.env.DEV_MODE === 'true' ? 'в режиме разработки' : ''}`,
+    );
     this.botRun = new Date();
     return 'Бот запущен';
   }
@@ -65,7 +67,6 @@ export class TelegrafService {
 
   private async checkUserAccess() {
     this.bot.use(async (ctx: Context, next: () => Promise<void>) => {
-      //  console.log(ctx);
       const userId = ctx.from.id;
       const {
         error,
