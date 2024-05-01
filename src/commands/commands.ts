@@ -4,7 +4,7 @@ import { OpenaiService } from 'src/openai/openai.service';
 
 @Injectable()
 export class CommandsService {
-  constructor(private openAiService: OpenaiService) {}
+  constructor(private openAiService: OpenaiService) { }
 
   start = (ctx: IBotContext) => {
     this.initializeSession(ctx);
@@ -30,6 +30,7 @@ export class CommandsService {
         const message = this.openAiService.createUserMessage(ctx.message.text);
         ctx.session.message.push(message);
         ctx.reply('🔄 Подождите, идет обработка запроса...');
+        //  console.log('text -> ctx.session.message', ctx.session.message);
         const response = await this.openAiService.response(ctx.session.message);
 
         if (response.error) {
@@ -53,12 +54,16 @@ export class CommandsService {
     try {
       this.initializeSession(ctx);
       if ('caption' in ctx.message && !('photo' in ctx.message)) {
-        console.log('Действие при наличии Caption');
+        // console.log('Действие при наличии Caption');
         this.processCaption(ctx);
       }
 
       if ('photo' in ctx.message) {
-        console.log('Распознавание фото');
+        //  console.log('Распознавание фото');
+        if (!ctx.message.caption) {
+          ctx.message.caption = 'Что на картинке?';
+        }
+
         await this.processPhoto(ctx);
       }
     } catch (error) {
@@ -83,6 +88,7 @@ export class CommandsService {
       `${ctx.message.caption || 'Что на картинке?'}`,
       photoUrl.href,
     );
+    //console.log('processPhoto -> message', message);
     ctx.reply('🔄 Подождите, идет обработка фото...');
     const response = await this.openAiService.imageResponse([message]);
 
