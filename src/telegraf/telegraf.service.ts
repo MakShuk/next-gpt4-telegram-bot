@@ -5,6 +5,7 @@ import { UsersService } from 'src/users/users.service';
 import { message } from 'telegraf/filters';
 import { Telegraf, session } from 'telegraf';
 import { Context } from 'telegraf';
+import { Message } from 'telegraf/typings/core/types/typegram';
 
 @Injectable()
 export class TelegrafService {
@@ -12,7 +13,7 @@ export class TelegrafService {
     private readonly logger: LoggerService,
     private readonly dataManagementService: DataManagementService,
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
   private bot: Telegraf;
   private botRun: false | Date = false;
 
@@ -90,4 +91,23 @@ export class TelegrafService {
       return next();
     });
   }
+
+  async editMessageText(
+    ctx: Context,
+    oldMessage: Message.TextMessage,
+    newMessage: string,
+    markdown = false,
+  ) {
+    if (newMessage.trim() === '') return;
+    await ctx.telegram.editMessageText(
+      oldMessage.chat.id,
+      oldMessage.message_id,
+      null,
+      newMessage,
+      {
+        parse_mode: markdown ? 'Markdown' : undefined,
+      },
+    );
+  }
+
 }
