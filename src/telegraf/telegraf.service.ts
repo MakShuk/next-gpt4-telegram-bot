@@ -13,7 +13,7 @@ export class TelegrafService {
     private readonly logger: LoggerService,
     private readonly dataManagementService: DataManagementService,
     private readonly usersService: UsersService,
-  ) { }
+  ) {}
   private bot: Telegraf;
   private botRun: false | Date = false;
 
@@ -109,5 +109,4 @@ export class TelegrafService {
       },
     );
   }
-
 }

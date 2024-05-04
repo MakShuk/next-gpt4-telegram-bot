@@ -7,7 +7,7 @@ import { Message } from 'telegraf/typings/core/types/typegram';
 
 @Injectable()
 export class CommandsService {
-  constructor(private openAiService: OpenaiService) { }
+  constructor(private openAiService: OpenaiService) {}
 
   start = (ctx: IBotContext) => {
     this.initializeSession(ctx);
@@ -30,34 +30,36 @@ export class CommandsService {
         return;
       }
       if ('text' in ctx.message) {
-        const sendMessage = await ctx.reply('🔄 Подождите, идет обработка запроса...');
+        const sendMessage = await ctx.reply(
+          '🔄 Подождите, идет обработка запроса...',
+        );
         const message = this.openAiService.createUserMessage(ctx.message.text);
         ctx.session.message.push(message);
 
         //  console.log('text -> ctx.session.message', ctx.session.message);
-        const streamResponse = await this.openAiService.streamResponse(ctx.session.message);
+        const streamResponse = await this.openAiService.streamResponse(
+          ctx.session.message,
+        );
 
         if ('error' in streamResponse) {
           ctx.reply(streamResponse.content);
-          return
+          return;
         }
 
         let messageContent = '';
 
         if (streamResponse instanceof Stream) {
-
           let lastCallTime = Date.now();
           for await (const part of streamResponse) {
             const currentTime = Date.now();
             messageContent += part.choices[0]?.delta?.content || '';
             if (currentTime - lastCallTime > 1000) {
               lastCallTime = currentTime;
-              await this.editMessageText(ctx, sendMessage, messageContent)
+              await this.editMessageText(ctx, sendMessage, messageContent);
             }
           }
 
-          await this.editMessageText(ctx, sendMessage, messageContent, true)
-
+          await this.editMessageText(ctx, sendMessage, messageContent, true);
 
           ctx.session.message.push(
             this.openAiService.createAssistantMessage(messageContent),
@@ -148,7 +150,6 @@ export class CommandsService {
       },
     );
   }
-
 
   private checkTime = (context: IBotContext): boolean =>
     context.message.date >= context.session.time
