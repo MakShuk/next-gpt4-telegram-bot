@@ -62,5 +62,4 @@ prisma/bot.db
 
 #media
 .mp3
-audios/305343617.mp3
-audios/305343617.ogg
+.ogg
