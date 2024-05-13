@@ -12,7 +12,8 @@ import { TelegrafService } from './telegraf/telegraf.service';
 import { LoggerService } from './services/logger/logger.service';
 import { OpenaiModule } from './openai/openai.module';
 import { OpenaiService } from './openai/openai.service';
-import { CommandsService } from './commands/commands';
+import { CommandsService } from './services/commands/commands';
+import { OggConverter } from './services/converter/ogg-converter.service';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { CommandsService } from './commands/commands';
     TelegrafService,
     OpenaiService,
     CommandsService,
+    OggConverter,
   ],
 })
 export class AppModule {}
