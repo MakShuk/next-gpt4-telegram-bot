@@ -66,6 +66,10 @@ export class TelegrafService {
     });
   }
 
+  async voiceMessage(callback: (ctx: Context) => void) {
+    this.bot.on(message('voice'), callback);
+  }
+
   private async checkUserAccess() {
     this.bot.use(async (ctx: Context, next: () => Promise<void>) => {
       const userId = ctx.from.id;
