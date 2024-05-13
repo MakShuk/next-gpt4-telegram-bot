@@ -59,3 +59,8 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 db/bot.db
 resources/bot.db
 prisma/bot.db
+
+#media
+.mp3
+audios/305343617.mp3
+audios/305343617.ogg

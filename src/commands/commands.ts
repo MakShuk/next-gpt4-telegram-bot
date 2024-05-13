@@ -4,10 +4,16 @@ import { OpenaiService } from 'src/openai/openai.service';
 import { Stream } from 'openai/streaming';
 import { Context } from 'telegraf';
 import { Message } from 'telegraf/typings/core/types/typegram';
+import * as fs from 'fs';
+import { OggConverter } from '../converter/ogg-converter.service';
+import axios from 'axios';
 
 @Injectable()
 export class CommandsService {
-  constructor(private openAiService: OpenaiService) {}
+  constructor(
+    private openAiService: OpenaiService,
+    private oggConverter: OggConverter,
+  ) {}
 
   start = (ctx: IBotContext) => {
     this.initializeSession(ctx);
@@ -29,43 +35,9 @@ export class CommandsService {
         await ctx.reply('🚧 Не успеваю за вами...');
         return;
       }
-      if ('text' in ctx.message) {
-        const sendMessage = await ctx.reply(
-          '🔄 Подождите, идет обработка запроса...',
-        );
-        const message = this.openAiService.createUserMessage(ctx.message.text);
-        ctx.session.message.push(message);
 
-        //  console.log('text -> ctx.session.message', ctx.session.message);
-        const streamResponse = await this.openAiService.streamResponse(
-          ctx.session.message,
-        );
-
-        if ('error' in streamResponse) {
-          ctx.reply(streamResponse.content);
-          return;
-        }
-
-        let messageContent = '';
-
-        if (streamResponse instanceof Stream) {
-          let lastCallTime = Date.now();
-          for await (const part of streamResponse) {
-            const currentTime = Date.now();
-            messageContent += part.choices[0]?.delta?.content || '';
-            if (currentTime - lastCallTime > 1000) {
-              lastCallTime = currentTime;
-              await this.editMessageText(ctx, sendMessage, messageContent);
-            }
-          }
-
-          await this.editMessageText(ctx, sendMessage, messageContent, true);
-
-          ctx.session.message.push(
-            this.openAiService.createAssistantMessage(messageContent),
-          );
-        }
-      }
+      if (!('text' in ctx.message)) return;
+      await this.streamMessage(ctx, ctx.message.text);
     } catch (error) {
       this.handleError(error, ctx);
     }
@@ -75,12 +47,10 @@ export class CommandsService {
     try {
       this.initializeSession(ctx);
       if ('caption' in ctx.message && !('photo' in ctx.message)) {
-        // console.log('Действие при наличии Caption');
         this.processCaption(ctx);
       }
 
       if ('photo' in ctx.message) {
-        //  console.log('Распознавание фото');
         if (!ctx.message.caption) {
           ctx.message.caption = 'Что на картинке?';
         }
@@ -91,6 +61,89 @@ export class CommandsService {
       this.handleError(error, ctx);
     }
   };
+
+  voiceMessage = async (ctx: IBotContext) => {
+    if (!('voice' in ctx.message)) return;
+    try {
+      this.initializeSession(ctx);
+      const fileId = ctx.message.voice?.file_id;
+      const fileLink = await ctx.telegram.getFileLink(fileId);
+      const userId = ctx.from.id;
+
+      const response = await axios({
+        method: 'get',
+        url: String(fileLink),
+        responseType: 'stream',
+      });
+
+      const dir = './audios';
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+      }
+
+      const writer = fs.createWriteStream(`./audios/${userId}.ogg`);
+
+      await new Promise((resolve, reject) => {
+        response.data.pipe(writer);
+        writer.on('finish', resolve);
+        writer.on('error', reject);
+      });
+
+      await this.covertToMp3(String(userId));
+
+      const readStream = fs.createReadStream(`./audios/${userId}.mp3`);
+
+      const transcription =
+        await this.openAiService.transcriptionAudio(readStream);
+      await this.streamMessage(ctx, transcription.content);
+    } catch (error) {
+      console.error(error);
+      await ctx.reply(
+        '⚠️ Произошла ошибка при обработке голосового сообщения.',
+      );
+    }
+  };
+
+  private async streamMessage(ctx: IBotContext, message: string) {
+    try {
+      const sendMessage = await ctx.reply(
+        '🔄 Подождите, идет обработка запроса...',
+      );
+      console.log('streamMessage -> message', message);
+      const userMessage = this.openAiService.createUserMessage(message);
+      ctx.session.message.push(userMessage);
+      const streamResponse = await this.openAiService.streamResponse(
+        ctx.session.message,
+      );
+
+      if ('error' in streamResponse) {
+        ctx.reply(streamResponse.content);
+        return;
+      }
+
+      let messageContent = '';
+
+      if (streamResponse instanceof Stream) {
+        let lastCallTime = Date.now();
+        for await (const part of streamResponse) {
+          const currentTime = Date.now();
+          messageContent += part.choices[0]?.delta?.content || '';
+          if (currentTime - lastCallTime > 1000) {
+            lastCallTime = currentTime;
+            await this.editMessageText(ctx, sendMessage, messageContent);
+          }
+        }
+
+        await this.editMessageText(ctx, sendMessage, messageContent, true);
+        ctx.session.message.push(
+          this.openAiService.createAssistantMessage(messageContent),
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      this.handleError(error, ctx);
+    }
+  }
 
   private processCaption = (ctx: IBotContext) => {
     if (!('caption' in ctx.message)) return;
@@ -149,6 +202,12 @@ export class CommandsService {
         parse_mode: markdown ? 'Markdown' : undefined,
       },
     );
+  }
+
+  private async covertToMp3(userId?: string) {
+    const inputFile = `C:/development/NextJS/next-gpt4-telegram-bot/audios/${userId}.ogg`;
+    const outputFile = `C:/development/NextJS/next-gpt4-telegram-bot/audios/${userId}.mp3`;
+    return await this.oggConverter.convertToMp3(inputFile, outputFile);
   }
 
   private checkTime = (context: IBotContext): boolean =>
