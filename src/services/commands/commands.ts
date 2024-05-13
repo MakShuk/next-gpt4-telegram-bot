@@ -7,6 +7,7 @@ import { Message } from 'telegraf/typings/core/types/typegram';
 import * as fs from 'fs';
 import { OggConverter } from '../converter/ogg-converter.service';
 import axios from 'axios';
+import * as path from 'path';
 
 @Injectable()
 export class CommandsService {
@@ -205,9 +206,29 @@ export class CommandsService {
   }
 
   private async covertToMp3(userId?: string) {
-    const inputFile = `C:/development/NextJS/next-gpt4-telegram-bot/audios/${userId}.ogg`;
-    const outputFile = `C:/development/NextJS/next-gpt4-telegram-bot/audios/${userId}.mp3`;
-    return await this.oggConverter.convertToMp3(inputFile, outputFile);
+    const inputFile = path.join(
+      __dirname,
+      '..',
+      '..',
+      '..',
+      'audios',
+      `${userId}.ogg`,
+    );
+    const outputFile = path.join(
+      __dirname,
+      '..',
+      '..',
+      '..',
+      'audios',
+      `${userId}.mp3`,
+    );
+    const converter = await this.oggConverter.convertToMp3(
+      inputFile,
+      outputFile,
+    );
+
+    await this.oggConverter.deleteFile(inputFile);
+    return converter;
   }
 
   private checkTime = (context: IBotContext): boolean =>
