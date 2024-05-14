@@ -189,7 +189,9 @@ export class CommandsService {
       ctx.reply(response.content);
       throw new Error(response.content);
     }
-
+    if (!response.content) {
+      throw new Error('No content in response');
+    }
     ctx.session.message.push(response.content);
     ctx.reply(response.content.content || '⚠️ Ответ не получен');
   };

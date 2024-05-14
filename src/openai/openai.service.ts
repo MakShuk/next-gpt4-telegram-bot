@@ -10,6 +10,7 @@ import {
 import { ReadStream } from 'fs';
 import { Stream } from 'openai/streaming';
 import { DataManagementService } from 'src/data-management/data-management.service';
+import { APIError } from 'openai/error';
 
 export interface ExtendedChatCompletionMessage extends ChatCompletionMessage {
   error?: boolean;
@@ -38,28 +39,13 @@ export class OpenaiService {
       if (!this.openai) throw new Error('OpenAI not initialized');
       const completion = await this.openai.chat.completions.create({
         messages: messages,
-        model: 'gpt-4-turbo-preview',
+        model: 'gpt-4o-2024-05-13',
       });
       if (!completion.choices[0]?.message)
         throw new Error('openai.chat.completions is undefined');
       return completion.choices[0]?.message;
-    } catch (error) {
-      if (error instanceof OpenAI.APIError) {
-        const { status, message, code, type } = error;
-        const errorMessage = `status: ${status} message: ${message} code: ${code} type: ${type}`;
-        console.error(errorMessage);
-        return {
-          role: 'assistant',
-          content: errorMessage,
-          error: true,
-        };
-      } else {
-        return {
-          role: 'assistant',
-          content: `Non-API error, ${error}`,
-          error: true,
-        };
-      }
+    } catch (error: unknown) {
+      return this.handleError(error);
     }
   }
 
@@ -69,28 +55,13 @@ export class OpenaiService {
     try {
       if (!this.openai) throw new Error('OpenAI not initialized');
       const stream = await this.openai.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
+        model: 'gpt-4o-2024-05-13',
         messages: messages,
         stream: true,
       });
       return stream;
-    } catch (error) {
-      if (error instanceof OpenAI.APIError) {
-        const { status, message, code, type } = error;
-        const errorMessage = `status: ${status} message: ${message} code: ${code} type: ${type}`;
-        console.error(errorMessage);
-        return {
-          role: 'assistant',
-          content: errorMessage,
-          error: true,
-        };
-      } else {
-        return {
-          role: 'assistant',
-          content: `Non-API error, ${error}`,
-          error: true,
-        };
-      }
+    } catch (error: unknown) {
+      return this.handleError(error);
     }
   }
 
@@ -98,7 +69,7 @@ export class OpenaiService {
     try {
       if (!this.openai) throw new Error('OpenAI not initialized');
       const completion = await this.openai.chat.completions.create({
-        model: 'gpt-4-vision-preview',
+        model: 'gpt-4o-2024-05-13',
         messages: messages,
       });
       if (!completion.choices[0]?.message)
@@ -108,56 +79,30 @@ export class OpenaiService {
         error: false,
         role: 'assistant',
       };
-    } catch (error) {
-      if (error instanceof OpenAI.APIError) {
-        const { status, message, code, type } = error;
-        const errorMessage = `status: ${status} message: ${message} code: ${code} type: ${type}`;
-        console.error(errorMessage);
-        return {
-          role: 'assistant',
-          content: errorMessage,
-          error: true,
-        };
-      } else {
-        return {
-          role: 'assistant',
-          content: `Non-API error, ${error}`,
-          error: true,
-        };
-      }
+    } catch (error: unknown) {
+      return this.handleError(error);
     }
   }
 
   async transcriptionAudio(
     audioStream: ReadStream,
   ): Promise<ExtendedChatCompletionMessage> {
+    if (!this.openai) {
+      throw new Error('OpenAI not initialized');
+    }
+
     try {
-      if (!this.openai) throw new Error('OpenAI not initialized');
       const response = await this.openai.audio.transcriptions.create({
         model: 'whisper-1',
         file: audioStream,
       });
+
       return {
         role: 'assistant',
         content: response.text,
       };
-    } catch (error) {
-      if (error instanceof OpenAI.APIError) {
-        const { status, message, code, type } = error;
-        const errorMessage = `status: ${status} message: ${message} code: ${code} type: ${type}`;
-        console.error(errorMessage);
-        return {
-          role: 'assistant',
-          content: errorMessage,
-          error: true,
-        };
-      } else {
-        return {
-          role: 'assistant',
-          content: `Non-API error, ${error}`,
-          error: true,
-        };
-      }
+    } catch (error: unknown) {
+      return this.handleError(error);
     }
   }
 
@@ -201,22 +146,36 @@ export class OpenaiService {
     };
   }
 
-  /*   private handleError(error: unknown) {
-    if (error instanceof OpenAI.APIError) {
+  private handleError(error: unknown): ExtendedChatCompletionMessage {
+    if (this.isAPIError(error)) {
       const { status, message, code, type } = error;
       const errorMessage = `status: ${status} message: ${message} code: ${code} type: ${type}`;
       console.error(errorMessage);
+
       return {
         role: 'assistant',
         content: errorMessage,
         error: true,
       };
     } else {
+      const errorMessage = `Non-API error: ${error}`;
+      console.error(errorMessage);
+
       return {
         role: 'assistant',
-        content: `Non-API error, ${error}`,
+        content: errorMessage,
         error: true,
       };
     }
-  } */
+  }
+
+  private isAPIError(error: unknown): error is APIError {
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      'status' in error &&
+      'code' in error &&
+      'type' in error
+    );
+  }
 }
