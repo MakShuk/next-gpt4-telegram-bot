@@ -1,23 +1,23 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "ES2021",
-    "sourceMap": true,
-    "outDir": "./dist",
-    "baseUrl": "./",
-    "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false,
-    "noUnusedLocals": true,
-    "strict": true
+    "module": "commonjs", // Рекомендуется для Node.js проектов
+    "declaration": false, // Рекомендуется, если вы планируете использовать этот код как библиотеку
+    "removeComments": true, // Рекомендуется, если вы хотите уменьшить размер выходного файла
+    "emitDecoratorMetadata": true, // Рекомендуется, если вы используете декораторы
+    "experimentalDecorators": true, // Рекомендуется, если вы используете декораторы
+    "allowSyntheticDefaultImports": true, // Рекомендуется, если вы импортируете модули, которые не имеют экспорта по умолчанию
+    "target": "ES2021", // Рекомендуется, если вы хотите использовать последние возможности ECMAScript
+    "sourceMap": true, // Рекомендуется для упрощения отладки
+    "outDir": "./dist", // Рекомендуется для организации выходных файлов
+    "baseUrl": "./", // Рекомендуется для упрощения импорта модулей
+    "incremental": true, // Рекомендуется для ускорения процесса компиляции
+    "skipLibCheck": true, // Рекомендуется, если вы доверяете своим библиотекам и хотите ускорить компиляцию
+    "strictNullChecks": true, // Рекомендуется включить для предотвращения ошибок null и undefined
+    "noImplicitAny": false, // Рекомендуется включить для предотвращения неявных any типов
+    "strictBindCallApply": false, // Рекомендуется включить для строгих проверок bind, call и apply
+    "forceConsistentCasingInFileNames": false, // Рекомендуется включить для предотвращения ошибок из-за неправильного регистра в именах файлов
+    "noFallthroughCasesInSwitch": false, // Рекомендуется включить для предотвращения ошибок в операторах switch
+    "noUnusedLocals": true, // Рекомендуется для предотвращения неиспользуемых переменных
+    "strict": true // Рекомендуется для включения всех строгих проверок типов
   }
 }

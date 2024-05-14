@@ -25,6 +25,7 @@ export class CommandsService {
 
   reset = (ctx: IBotContext) => {
     this.initializeSession(ctx);
+    if (!ctx.session) return;
     ctx.session.message = [];
     ctx.reply('⤵️ Контекст сброшен, диалог начат заново');
   };
@@ -36,7 +37,7 @@ export class CommandsService {
         await ctx.reply('🚧 Не успеваю за вами...');
         return;
       }
-
+      if (!ctx.message) return;
       if (!('text' in ctx.message)) return;
       await this.streamMessage(ctx, ctx.message.text);
     } catch (error) {
@@ -47,6 +48,7 @@ export class CommandsService {
   repostAndImage = async (ctx: IBotContext) => {
     try {
       this.initializeSession(ctx);
+      if (!ctx.message) return;
       if ('caption' in ctx.message && !('photo' in ctx.message)) {
         this.processCaption(ctx);
       }
@@ -64,6 +66,9 @@ export class CommandsService {
   };
 
   voiceMessage = async (ctx: IBotContext) => {
+    if (!ctx.message) return;
+    if (!ctx.from) return;
+
     if (!('voice' in ctx.message)) return;
     try {
       this.initializeSession(ctx);
@@ -96,6 +101,10 @@ export class CommandsService {
 
       const transcription =
         await this.openAiService.transcriptionAudio(readStream);
+      if (!transcription.content) {
+        throw new Error(`No content in transcription`);
+      }
+
       await this.streamMessage(ctx, transcription.content);
     } catch (error) {
       console.error(error);
@@ -110,7 +119,7 @@ export class CommandsService {
       const sendMessage = await ctx.reply(
         '🔄 Подождите, идет обработка запроса...',
       );
-      console.log('streamMessage -> message', message);
+      if (!ctx.session) throw new Error(`No session message`);
       const userMessage = this.openAiService.createUserMessage(message);
       ctx.session.message.push(userMessage);
       const streamResponse = await this.openAiService.streamResponse(
@@ -118,7 +127,9 @@ export class CommandsService {
       );
 
       if ('error' in streamResponse) {
-        ctx.reply(streamResponse.content);
+        ctx.reply(
+          streamResponse.content || '⚠️ Произошла ошибка streamMessage',
+        );
         return;
       }
 
@@ -147,7 +158,11 @@ export class CommandsService {
   }
 
   private processCaption = (ctx: IBotContext) => {
+    this.initializeSession(ctx);
+    if (!ctx.message) return;
+    if (!ctx.session) return;
     if (!('caption' in ctx.message)) return;
+    if (!ctx.message.caption) return;
     ctx.session.message.push(
       this.openAiService.createAssistantMessage(ctx.message.caption),
     );
@@ -155,8 +170,11 @@ export class CommandsService {
   };
 
   private processPhoto = async (ctx: IBotContext) => {
+    this.initializeSession(ctx);
+    if (!ctx.message) return;
     if (!('caption' in ctx.message)) return;
     if (!('photo' in ctx.message)) return;
+    if (!ctx.session) return;
     const photo = ctx.message.photo[ctx.message.photo.length - 1];
     const photoUrl = await ctx.telegram.getFileLink(photo.file_id);
     const message = this.openAiService.createImageUserMessage(
@@ -167,15 +185,13 @@ export class CommandsService {
     ctx.reply('🔄 Подождите, идет обработка фото...');
     const response = await this.openAiService.imageResponse([message]);
 
-    if (response.error) {
+    if (typeof response.content === 'string') {
       ctx.reply(response.content);
       throw new Error(response.content);
     }
 
-    ctx.session.message.push(
-      this.openAiService.createAssistantMessage(response.content),
-    );
-    ctx.reply(response.content);
+    ctx.session.message.push(response.content);
+    ctx.reply(response.content.content || '⚠️ Ответ не получен');
   };
 
   private initializeSession = (ctx: IBotContext) => {
@@ -197,7 +213,7 @@ export class CommandsService {
     await ctx.telegram.editMessageText(
       oldMessage.chat.id,
       oldMessage.message_id,
-      null,
+      undefined,
       newMessage,
       {
         parse_mode: markdown ? 'Markdown' : undefined,
@@ -231,8 +247,11 @@ export class CommandsService {
     return converter;
   }
 
-  private checkTime = (context: IBotContext): boolean =>
-    context.message.date >= context.session.time
-      ? ((context.session.time = context.message.date + 6), true)
+  private checkTime = (ctx: IBotContext): boolean => {
+    if (!ctx.message) throw new Error('No message');
+    if (!ctx.session) throw new Error(`No session`);
+    return ctx.message.date >= ctx.session.time
+      ? ((ctx.session.time = ctx.message.date + 6), true)
       : false;
+  };
 }

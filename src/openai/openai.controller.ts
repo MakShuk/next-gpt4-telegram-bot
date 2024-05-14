@@ -3,7 +3,10 @@ import { OpenaiService, ExtendedChatCompletionMessage } from './openai.service';
 import fs, { ReadStream } from 'fs';
 import { Stream } from 'openai/streaming';
 import { Response } from 'express';
-import { ChatCompletionChunk } from 'openai/resources/chat';
+import {
+  ChatCompletionChunk,
+  ChatCompletionMessageParam,
+} from 'openai/resources/chat';
 
 @Controller('openai')
 export class OpenaiController {
@@ -11,7 +14,7 @@ export class OpenaiController {
 
   @Get('response')
   async response(): Promise<ExtendedChatCompletionMessage> {
-    const messages = [];
+    const messages: ChatCompletionMessageParam[] = [];
     messages.push(this.openaiService.createUserMessage('1 афоризм'));
     const response = await this.openaiService.response(messages);
     if (response.error) console.log('Ошибка');

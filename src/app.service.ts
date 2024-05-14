@@ -15,7 +15,7 @@ export class AppService implements OnModuleInit {
     private command: CommandsService,
   ) {}
 
-  async startBot(): Promise<string> {
+  async startBot(): Promise<void> {
     try {
       await this.openAiService.onModuleInit();
       await this.telegrafService.botInit();
@@ -26,7 +26,6 @@ export class AppService implements OnModuleInit {
       this.telegrafService.repostMessage(this.command.repostAndImage);
       this.telegrafService.imageMessage();
       await this.telegrafService.startBot();
-      return 'Bot started';
     } catch (error) {
       console.error('Error starting bot:', error);
     }

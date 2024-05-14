@@ -14,7 +14,7 @@ export class TelegrafService {
     private readonly dataManagementService: DataManagementService,
     private readonly usersService: UsersService,
   ) {}
-  private bot: Telegraf;
+  private bot: Telegraf | undefined;
   private botRun: false | Date = false;
 
   async botInit() {
@@ -24,6 +24,8 @@ export class TelegrafService {
       this.logger.error('Ошибка получения токена бота');
       return `Ошибка получения токена бота: ${botToken.message}`;
     }
+
+    if (!botToken.data) return;
     this.bot = new Telegraf(botToken.data.token);
     this.bot.use(session());
     this.bot.catch((err: any, ctx: Context) => {
@@ -37,7 +39,7 @@ export class TelegrafService {
       this.logger.warn('Бот уже запущен');
       return `Бот уже запущен: ${this.botRun}`;
     }
-
+    if (!this.bot) return;
     this.bot.launch();
     this.logger.info(
       `Бот запущен ${process.env.DEV_MODE === 'true' ? 'в режиме разработки' : ''}`,
@@ -47,19 +49,24 @@ export class TelegrafService {
   }
 
   createCommand(command: string, callback: (ctx: Context) => void) {
+    if (!this.bot) return;
     this.bot.command(command, callback);
   }
 
   textMessage(callback: (ctx: Context) => void) {
+    if (!this.bot) return;
     this.bot.on(message('text'), callback);
   }
 
   repostMessage(callback: (ctx: Context) => void) {
+    if (!this.bot) return;
     this.bot.on('message', callback);
   }
 
   imageMessage() {
+    if (!this.bot) return;
     this.bot.on('photo', (ctx: Context) => {
+      if (!this.bot) return;
       console.log('photo');
       console.log(ctx.message);
       ctx.reply('🚧 В разработке');
@@ -67,11 +74,14 @@ export class TelegrafService {
   }
 
   async voiceMessage(callback: (ctx: Context) => void) {
+    if (!this.bot) return;
     this.bot.on(message('voice'), callback);
   }
 
   private async checkUserAccess() {
+    if (!this.bot) return;
     this.bot.use(async (ctx: Context, next: () => Promise<void>) => {
+      if (!ctx.from) return;
       const userId = ctx.from.id;
       const {
         error,
@@ -106,7 +116,7 @@ export class TelegrafService {
     await ctx.telegram.editMessageText(
       oldMessage.chat.id,
       oldMessage.message_id,
-      null,
+      undefined,
       newMessage,
       {
         parse_mode: markdown ? 'Markdown' : undefined,

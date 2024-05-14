@@ -18,12 +18,15 @@ export interface ExtendedChatCompletionMessage extends ChatCompletionMessage {
 @Injectable()
 export class OpenaiService {
   constructor(private readonly dataManagementService: DataManagementService) {}
-  openai: OpenAI;
+  openai: OpenAI | undefined;
 
   async onModuleInit() {
     const openaiKey = await this.dataManagementService.getOpenAiKey();
     if (openaiKey.error) {
       throw new Error(`OpenAI key not found: ${openaiKey.message}`);
+    }
+    if (!openaiKey.data) {
+      throw new Error('OpenAI key not found');
     }
     this.openai = new OpenAI({ apiKey: openaiKey.data.key });
   }
@@ -32,6 +35,7 @@ export class OpenaiService {
     messages: ChatCompletionMessageParam[],
   ): Promise<ExtendedChatCompletionMessage> {
     try {
+      if (!this.openai) throw new Error('OpenAI not initialized');
       const completion = await this.openai.chat.completions.create({
         messages: messages,
         model: 'gpt-4-turbo-preview',
@@ -63,6 +67,7 @@ export class OpenaiService {
     messages: ChatCompletionMessageParam[],
   ): Promise<Stream<ChatCompletionChunk> | ExtendedChatCompletionMessage> {
     try {
+      if (!this.openai) throw new Error('OpenAI not initialized');
       const stream = await this.openai.chat.completions.create({
         model: 'gpt-4-turbo-preview',
         messages: messages,
@@ -89,17 +94,20 @@ export class OpenaiService {
     }
   }
 
-  async imageResponse(
-    messages: ChatCompletionMessageParam[],
-  ): Promise<ExtendedChatCompletionMessage> {
+  async imageResponse(messages: ChatCompletionMessageParam[]) {
     try {
+      if (!this.openai) throw new Error('OpenAI not initialized');
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4-vision-preview',
         messages: messages,
       });
       if (!completion.choices[0]?.message)
         throw new Error('openai.chat.completions is undefined');
-      return completion.choices[0]?.message;
+      return {
+        content: completion.choices[0]?.message,
+        error: false,
+        role: 'assistant',
+      };
     } catch (error) {
       if (error instanceof OpenAI.APIError) {
         const { status, message, code, type } = error;
@@ -124,6 +132,7 @@ export class OpenaiService {
     audioStream: ReadStream,
   ): Promise<ExtendedChatCompletionMessage> {
     try {
+      if (!this.openai) throw new Error('OpenAI not initialized');
       const response = await this.openai.audio.transcriptions.create({
         model: 'whisper-1',
         file: audioStream,
@@ -153,6 +162,7 @@ export class OpenaiService {
   }
 
   async fileUploads(): Promise<void> {
+    if (!this.openai) throw new Error('OpenAI not initialized');
     await this.openai.files.create({
       file: fs.createReadStream('input.json'),
       purpose: 'fine-tune',
@@ -190,4 +200,23 @@ export class OpenaiService {
       ],
     };
   }
+
+  /*   private handleError(error: unknown) {
+    if (error instanceof OpenAI.APIError) {
+      const { status, message, code, type } = error;
+      const errorMessage = `status: ${status} message: ${message} code: ${code} type: ${type}`;
+      console.error(errorMessage);
+      return {
+        role: 'assistant',
+        content: errorMessage,
+        error: true,
+      };
+    } else {
+      return {
+        role: 'assistant',
+        content: `Non-API error, ${error}`,
+        error: true,
+      };
+    }
+  } */
 }

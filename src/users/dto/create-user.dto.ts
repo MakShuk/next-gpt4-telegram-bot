@@ -11,20 +11,20 @@ class NameDto {
   @IsString()
   @IsNotEmpty()
   @Length(NAME_MIN_LENGTH, NAME_MAX_LENGTH)
-  readonly name: string;
+  readonly name!: string;
 }
 export class CreateUserDto extends NameDto {
   @IsInt()
   @IsNotEmpty()
   @Min(ID_MIN_VALUE)
   @Max(ID_MAX_VALUE)
-  readonly telegramId: number;
+  readonly telegramId!: number;
 
   @IsInt()
   @IsNotEmpty()
   @Min(ROLE_ID_MIN_VALUE)
   @Max(ROLE_ID_MAX_VALUE)
-  readonly roleId: number;
+  readonly roleId: number | undefined;
 }
 
 export class CreateRoleDto extends NameDto {
@@ -32,5 +32,5 @@ export class CreateRoleDto extends NameDto {
   @IsNotEmpty()
   @Min(ROLE_ID_MIN_VALUE)
   @Max(ID_MAX_VALUE)
-  readonly maxUsers: number;
+  readonly maxUsers!: number;
 }
