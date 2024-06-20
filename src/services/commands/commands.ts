@@ -116,7 +116,7 @@ export class CommandsService {
 
   private async streamMessage(ctx: IBotContext, message: string) {
     try {
-      const sendMessage = await ctx.reply(
+      let sendMessage = await ctx.reply(
         '🔄 Подождите, идет обработка запроса...',
       );
       if (!ctx.session) throw new Error(`No session message`);
@@ -133,16 +133,26 @@ export class CommandsService {
         return;
       }
 
-      let messageContent = '';
+      let messageContent = ``;
+      let messagesSplit: string[] = [];
 
       if (streamResponse instanceof Stream) {
         let lastCallTime = Date.now();
         for await (const part of streamResponse) {
           const currentTime = Date.now();
           messageContent += part.choices[0]?.delta?.content || '';
+          messagesSplit = this.splitMessage(messageContent, 3900);
+
           if (currentTime - lastCallTime > 1000) {
             lastCallTime = currentTime;
-            await this.editMessageText(ctx, sendMessage, messageContent);
+            if (messagesSplit.length > 1) {
+              messagesSplit = this.splitMessage(messageContent, 3900);
+              await this.editMessageText(ctx, sendMessage, messageContent);
+              sendMessage = await ctx.reply(`Обработка сообщения...`);
+              messageContent = messagesSplit[1];
+            } else {
+              await this.editMessageText(ctx, sendMessage, messagesSplit[0]);
+            }
           }
         }
 
@@ -181,7 +191,7 @@ export class CommandsService {
       `${ctx.message.caption || 'Что на картинке?'}`,
       photoUrl.href,
     );
-    //console.log('processPhoto -> message', message);
+
     ctx.reply('🔄 Подождите, идет обработка фото...');
     const response = await this.openAiService.imageResponse([message]);
 
@@ -247,6 +257,23 @@ export class CommandsService {
 
     await this.oggConverter.deleteFile(inputFile);
     return converter;
+  }
+
+  private splitMessage(message: string, limit = 4096) {
+    const parts: string[] = [];
+    while (message.length > 0) {
+      if (message.length > limit) {
+        let part = message.slice(0, limit);
+        const cutAt = part.lastIndexOf(' ');
+        part = part.slice(0, cutAt);
+        parts.push(part);
+        message = message.slice(cutAt);
+      } else {
+        parts.push(message);
+        message = '';
+      }
+    }
+    return parts;
   }
 
   private checkTime = (ctx: IBotContext): boolean => {
